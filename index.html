@@ -235,7 +235,8 @@ kbd{background:#222b38;border:1px solid #3a4658;border-radius:4px;padding:0 4px;
           <!-- sheath, CSF, nerve -->
           <g class="st" data-s="sheath"><path d="M193 296 C190 318 192 330 195 345 L198 495 L242 495 L245 345 C248 330 250 318 247 296 Z" fill="#cfc8bb"/></g>
           <g class="st" data-s="csf"><path d="M199 298 C197 318 199 330 201 345 L203 495 L237 495 L239 345 C241 330 243 318 241 298 Z" fill="#9fd3f0"/></g>
-          <g class="st" data-s="nerve"><rect x="207" y="298" width="26" height="197" fill="#f0e2bd"/><path d="M216 300 L216 400 L196 420" stroke="#d23c3c" stroke-width="2.2" fill="none"/></g>
+          <g class="st" data-s="nerve"><rect x="207" y="298" width="26" height="197" fill="#f0e2bd"/></g>
+          <g class="st" data-s="vessels"><path d="M216 300 L216 400 L196 420" stroke="#d23c3c" stroke-width="2.4" fill="none"/><path d="M223 300 L223 404 L201 426" stroke="#3b6fd8" stroke-width="2.4" fill="none"/></g>
           <!-- globe wall layers -->
           <g class="st" data-s="sclera"><circle cx="220" cy="175" r="124" fill="none" stroke="#f1eee6" stroke-width="9"/></g>
           <g class="st" data-s="choroid"><circle cx="220" cy="175" r="118" fill="none" stroke="#8b3a3a" stroke-width="4"/></g>
@@ -264,7 +265,7 @@ kbd{background:#222b38;border:1px solid #3a4658;border-radius:4px;padding:0 4px;
             <line x1="245" y1="330" x2="410" y2="322"/><text x="414" y="326">Dural sheath</text>
             <line x1="239" y1="360" x2="410" y2="350"/><text x="414" y="354">CSF space</text>
             <line x1="228" y1="390" x2="410" y2="378"/><text x="414" y="382">Optic nerve</text>
-            <line x1="200" y1="418" x2="150" y2="470"/><text x="20" y="486">Central retinal artery</text>
+            <line x1="200" y1="418" x2="150" y2="470"/><text x="20" y="486">Central retinal artery and vein</text>
             <line x1="300" y1="440" x2="410" y2="420"/><text x="414" y="424">Retrobulbar fat</text>
             <line x1="100" y1="330" x2="40" y2="300"/><text x="12" y="292">Extraocular</text><text x="12" y="306">muscle</text>
           </g>
@@ -277,6 +278,7 @@ kbd{background:#222b38;border:1px solid #3a4658;border-radius:4px;padding:0 4px;
         <div class="row" style="margin:0 0 6px">
           <div class="seg" id="mSeg"><button data-v="ok" class="on">Correct technique</button><button data-v="err">Common errors</button></div>
           <label class="small" style="min-width:0"><input type="checkbox" id="papChk"> Show papilledema</label>
+          <label class="small" style="min-width:0"><input type="checkbox" id="dopChk"> Show color Doppler</label>
         </div>
         <svg id="usFig" viewBox="0 0 520 500" role="img" aria-label="Ultrasound schematic showing ONSD measurement location">
           <defs>
@@ -292,6 +294,11 @@ kbd{background:#222b38;border:1px solid #3a4658;border-radius:4px;padding:0 4px;
           <g id="usNerveN"><path d="M197 300 C194 318 196 330 199 345 L202 495 L238 495 L241 345 C244 330 246 318 243 300 Z" fill="#0b0b0b" stroke="#e8e8e8" stroke-width="2.5"/></g>
           <g id="usNerveP" style="display:none"><path d="M189 300 C184 318 186 332 191 348 L196 495 L244 495 L249 348 C254 332 256 318 251 300 Z" fill="#0b0b0b" stroke="#e8e8e8" stroke-width="2.5"/><path d="M204 296 Q220 276 236 296 Z" fill="#9d9d9d"/></g>
           <text x="20" y="34" fill="#9aa7b4" font-size="11">Scale: 10 px = 1 mm (globe about 24 mm)</text>
+          <g id="dopG" style="display:none" font-size="11.5">
+            <rect x="185" y="292" width="70" height="70" fill="none" stroke="#ffffff" stroke-dasharray="4 3" opacity=".6"/>
+            <line x1="216" y1="300" x2="216" y2="352" stroke="#e53935" stroke-width="3"/><line x1="224" y1="300" x2="224" y2="352" stroke="#3b6fd8" stroke-width="3"/>
+            <line x1="256" y1="300" x2="356" y2="232" stroke="#ff8a80"/><text x="360" y="222" fill="#ff8a80" font-weight="700">Color Doppler: central</text><text x="360" y="236" fill="#ff8a80">retinal artery (red) and</text><text x="360" y="250" fill="#ff8a80">vein (blue) confirm the nerve</text>
+          </g>
           <g id="mOk" font-size="11.5">
             <circle cx="220" cy="296" r="4" fill="#f2b84b"/><text x="120" y="290" fill="#f2b84b" font-weight="700">A</text><line x1="133" y1="288" x2="212" y2="295" stroke="#f2b84b" stroke-dasharray="3 3"/>
             <line x1="220" y1="296" x2="220" y2="326" stroke="#f2b84b" stroke-width="2.5" marker-end="url(#arr)"/>
@@ -310,13 +317,15 @@ kbd{background:#222b38;border:1px solid #3a4658;border-radius:4px;padding:0 4px;
             <line x1="185" y1="326" x2="255" y2="326" stroke="#ff6b6b" stroke-width="1.5" stroke-dasharray="2 3" transform="translate(0 50)"/><text x="304" y="380" fill="#ff6b6b">3. Too deep (8 mm): past the</text><text x="318" y="394" fill="#ff6b6b">widest point</text><line x1="257" y1="376" x2="300" y2="376" stroke="#ff6b6b"/>
             <line x1="174" y1="125" x2="174" y2="495" stroke="#ff6b6b" stroke-width="1.5" stroke-dasharray="6 4"/><text x="20" y="440" fill="#ff6b6b">4. Lens edge shadow</text><text x="20" y="454" fill="#ff6b6b">mistaken for the nerve</text>
             <line x1="200" y1="300" x2="244" y2="350" stroke="#ff6b6b" stroke-width="2.5" stroke-dasharray="4 2"/><text x="20" y="400" fill="#ff6b6b">5. Oblique caliper or</text><text x="20" y="414" fill="#ff6b6b">oblique nerve (rock/fan)</text>
+            <path d="M206 304 L184 495 L256 495 L234 304 Z" fill="#000" opacity=".35" stroke="#ff6b6b" stroke-dasharray="5 3"/><text x="20" y="340" fill="#ff6b6b">6. Lamina cribrosa shadow:</text><text x="20" y="354" fill="#ff6b6b">black tube widening with</text><text x="20" y="368" fill="#ff6b6b">depth, no color flow</text><line x1="150" y1="352" x2="200" y2="380" stroke="#ff6b6b"/>
           </g>
         </svg>
         <ol class="small" style="margin:8px 0 0;padding-left:18px">
           <li><b>A:</b> find the posterior globe where the optic nerve enters (the optic disc).</li>
           <li><b>A to B:</b> go 3 mm straight back along the nerve axis, where the sheath is widest.</li>
-          <li><b>At B:</b> measure perpendicular to the nerve, outer wall to outer wall of the hypoechoic stripe.</li>
+          <li><b>At B:</b> measure perpendicular to the nerve (and its vessels), from the outer edge of one hyperechoic sheath wall to the outer edge of the other. Never include the black shadows outside the sheath.</li>
           <li>Align first: rock until the nerve is parallel to the beam, fan until the sheath is widest.</li>
+          <li><b>Confirm it is the nerve:</b> turn on color Doppler briefly. The central retinal artery (red) and vein (blue) run down the middle of the nerve for about 5 mm. A dark stripe with no flow, especially one that widens with depth, is shadow artifact.</li>
           <li>Repeat in the transverse and sagittal planes, scan both eyes, and average (best three).</li>
           <li>If the ONSD is 5 to 6 mm, measure the optic disc elevation (ODE).</li>
         </ol>
@@ -334,6 +343,7 @@ kbd{background:#222b38;border:1px solid #3a4658;border-radius:4px;padding:0 4px;
         <li><b>Probe:</b> pencil grip, indicator to the patient's right in the transverse plane, very light pressure, and the side of your hand braced on the cheek, nasal bridge or forehead.</li>
         <li><b>Survey near to far:</b> lid, cornea, anterior chamber, iris, lens, vitreous, retina, then the optic nerve behind the globe. Scan both eyes.</li>
         <li><b>Align:</b> rock the probe (often about 15 degrees laterally) or have the patient change gaze until the sheath runs parallel to the beam. An oblique nerve blurs the walls and invites edge artifact.</li>
+        <li><b>Confirm with color Doppler:</b> briefly turn on color. The central retinal artery and vein run down the middle of the nerve for about 5 mm; this confirms the nerve and shows its true direction. Measure perpendicular to the vessels. Keep Doppler time short (it raises TI).</li>
         <li><b>Measure:</b> from the posterior globe at the disc, go 3 mm straight back along the nerve. At that point, measure the sheath outer wall to outer wall. Repeat in the sagittal plane and average. Take several measurements and average the best three.</li>
       </ol>
     </div>
@@ -385,6 +395,8 @@ kbd{background:#222b38;border:1px solid #3a4658;border-radius:4px;padding:0 4px;
       </table>
       <h2>Pitfalls</h2>
       <ul>
+        <li><b>Lamina cribrosa shadow:</b> the nerve passes through a collagen mesh at the back of the globe that casts a black, tube-like shadow straight down the beam, widening with depth. It is often mislabeled as the nerve; measuring it inflates the ONSD (in one demonstration, 5.8 mm for the artifact vs 3.1 mm for the actual nerve).</li>
+        <li><b>The nerve curves:</b> its course changes with the angle of insonation. Center it so it runs straight down from the disc, and check with color Doppler that the stripe you measure contains the central retinal artery and vein.</li>
         <li><b>Edge artifact:</b> shadows from the lens edges run straight down the image and can be mistaken for the nerve sheath, especially when the nerve is oblique.</li>
         <li><b>Too much pressure:</b> distorts the globe and the measurement and is hazardous.</li>
         <li><b>Air under the dressing:</b> reverberation and dropout.</li>
@@ -398,6 +410,7 @@ kbd{background:#222b38;border:1px solid #3a4658;border-radius:4px;padding:0 4px;
         <li>NUEM Blog. SonoPro tips and tricks for evaluation of elevated intracranial pressure. <a href="https://www.nuemblog.com/blog/sonopro-tips-and-tricks-for-evaluation-of-elevated-intracranial-pressure" target="_blank" rel="noopener">nuemblog.com</a></li>
         <li>ASRA Pain Medicine News. POCUS spotlight: point-of-care ultrasound of the eyes. May 2024. <a href="https://asra.com/news-publications/asra-newsletter/newsletter-item/asra-news/2024/05/02/pocus-spotlight-point-of-care-ultrasound-of-the-eyes" target="_blank" rel="noopener">asra.com</a></li>
         <li>Geeraerts T, Duranteau J, Benhamou D. Ocular sonography in patients with raised intracranial pressure: the papilloedema revisited. Crit Care. 2008;12:150. doi:10.1186/cc6893</li>
+        <li>Miller A. Optic nerve ultrasound (pearls and pitfalls). Video lecture. <a href="https://www.youtube.com/watch?v=QTD07JuJQ9E" target="_blank" rel="noopener">youtube.com</a></li>
         <li>Soldatos T, et al. Optic nerve sonography in the diagnostic evaluation of adult brain injury. Crit Care. 2008;12:R67.</li>
       </ul>
       <p class="small muted">The image is synthetic and the physiology model (ICP to ONSD, disc elevation timing) is a simplified teaching model, not a validated predictor.</p>
@@ -588,9 +601,11 @@ function retro(G,xe,ze,y,onsd,colorOn,phase){
     nv=mix(nv,v,ss(half-w,half+w,a));
     v=nv;
     if(S.path==="crao"){ const dd=Math.hypot(a,d-2.0); if(dd<0.45) v=Math.max(v,0.98); }
-    if(colorOn && d>1.2 && d<10){
-      if(S.path!=="crao" && Math.hypot(xe+0.15,y)<0.32) col=1*(0.55+0.45*Math.max(0,Math.sin(phase)));
-      else if(Math.hypot(xe-0.6,y)<0.28) col=-(S.path==="crao"?0.35:0.7);
+    if(colorOn && d>0.3 && d<6.5){
+      // central retinal artery (red, toward probe, pulsatile) and vein (blue) run down the middle of the nerve
+      const fade=1-ss(4.5,6.5,d);
+      if(S.path!=="crao" && Math.hypot(xe+0.3,y)<0.3) col=fade*(0.55+0.45*Math.max(0,Math.sin(phase)));
+      else if(Math.hypot(xe-0.35,y)<0.28) col=-fade*(S.path==="crao"?0.35:0.7);
     }
   }
   return [v,col];
@@ -622,6 +637,7 @@ function render(){
   const colorOn=S.color;
   // lens edge shadow positions (world)
   const e1=toWorld(G,lp.x-lp.rx,lp.z), e2=toWorld(G,lp.x+lp.rx,lp.z);
+  const lcStr=0.25+0.55*Math.min(1,Math.abs(G.psi*180/Math.PI)/10+Math.abs(G.fanDeg)/3);
   const data=img.data;
   for(let yy=0;yy<rows;yy++){
     const sDepth=(yy+0.5)/PX_MM, att=Math.exp(-0.010*sDepth), zc0=sDepth*G.cD, y=sDepth*G.sD;
@@ -677,6 +693,9 @@ function render(){
       const shEnd=(ZC+R+3)/G.cD;
       if(sDepth>e1.z+1 && sDepth<shEnd && Math.abs(xi-e1.x)<0.4) v*=0.8;
       if(sDepth>e2.z+1 && sDepth<shEnd && Math.abs(xi-e2.x)<0.4) v*=0.8;
+      // lamina cribrosa shadow: a dark tube straight down the beam from the disc that widens with depth (artifact, no color flow)
+      if(sDepth>G.P.z+0.6){ const dd=sDepth-G.P.z, hw=1.1+0.16*dd, dx=Math.abs(xi-G.P.x);
+        if(dx<hw+0.5){ v*=1-lcStr*(1-ss(hw-0.5,hw+0.5,dx))*(1-ss(18,26,dd)); } }
       // air under dressing
       if(S.air && xi<-3.5){ if(sDepth<6){ const ph=(sDepth%1.15); if(ph<0.22) v=Math.max(v,0.65*Math.exp(-sDepth/3)); else v*=0.1; } else v*=0.08; }
       let sp = S.frozen ? SPA[i] : SPA[i]*(1-wB)+SPB[i]*wB; if(wallW>0) sp=mix(sp,1,0.65*wallW);
@@ -730,6 +749,7 @@ function drawScreen(G,onsd,ode){
       ["Vitreous body", toWorld(G,3.0,0)],
       ["Retina", toWorld(G,4.0,Math.sqrt(R*R-16)+0.3)],
       ["Optic nerve sheath", toWorld(G,0.6,R+6)],
+      ...(S.color?[["Retinal artery (red) / vein (blue)", toWorld(G,-0.3,R+2.5)]]:[]),
       ["Retrobulbar fat", toWorld(G,5.5,R+9)]
     ];
     const fs=Math.max(13,Math.min(16,W/dpr/30));
@@ -877,12 +897,13 @@ function evaluate(){
     const err=diamC.L-onsd; measured=diamC.L;
     const depthOk=Math.abs(along-3)<=0.8, centered=Math.abs(perp)<=0.8;
     out.push(`<div class="${depthOk?"ok":"mid"}">Diameter caliper depth: ${along.toFixed(1)} mm behind the globe ${depthOk?"(on target)":"(should be 3 mm, where the sheath is widest)"}.</div>`);
-    if(!centered) out.push(`<div class="no">Diameter caliper is not centered on the nerve. Did you measure a lens edge shadow?</div>`);
+    if(!centered) out.push(`<div class="no">Diameter caliper is not centered on the nerve. Did you measure the lamina cribrosa shadow (the black tube running straight down from the disc) or a lens edge shadow? Turn on color Doppler: the retinal vessels run through the real nerve.</div>`);
     const aerr=Math.abs(err);
-    out.push(`<div class="${aerr<=0.3?"ok":aerr<=0.6?"mid":"no"}">Your ONSD ${diamC.L.toFixed(2)} mm vs reference ${onsd.toFixed(2)} mm (${err>=0?"+":""}${err.toFixed(2)}). ${aerr<=0.3?"Outer wall to outer wall: well done.":err<0?"Too small: measure to the outer edge of each bright sheath wall.":"Too large: you may have included retrobulbar fat."}</div>`);
+    out.push(`<div class="${aerr<=0.3?"ok":aerr<=0.6?"mid":"no"}">Your ONSD ${diamC.L.toFixed(2)} mm vs reference ${onsd.toFixed(2)} mm (${err>=0?"+":""}${err.toFixed(2)}). ${aerr<=0.3?"Outer wall to outer wall: well done.":err<0?"Too small: measure to the outer edge of each bright (hyperechoic) sheath wall, not inner wall to inner wall.":"Too large: you may have included the black shadows outside the sheath or retrobulbar fat. Measure only the hyperechoic sheath, outer edge to outer edge."}</div>`);
     quality = (aerr<=0.3?2:aerr<=0.6?1:0) + (depthOk?1:0) + (ang<=4&&fa<=1.5?1:0);
   } else out.push(`<div class="mid">No diameter caliper found. Place one perpendicular to the nerve, outer wall to outer wall.</div>`);
   if(odeC){ const err=odeC.L-ode; out.push(`<div class="${Math.abs(err)<=0.3?"ok":"mid"}">Disc elevation caliper: ${odeC.L.toFixed(2)} mm vs reference ${ode.toFixed(2)} mm.</div>`); }
+  if(diamC) out.push(S.color?`<div class="ok">Color Doppler on: the central retinal artery (red) and vein (blue) run down the middle of the stripe, confirming you are measuring the optic nerve and not shadow artifact.</div>`:`<div class="mid">Tip: turn on color Doppler briefly. If the central retinal artery and vein run through the stripe, it is the nerve; a dark stripe with no flow is likely artifact.</div>`);
   const P=PRESETS[S.preset], ti=S.color?P.tiC:P.ti;
   if(P.mi>=0.23||ti>1) out.push(`<div class="no">Safety: output exceeds ocular limits (MI ${P.mi}, TI ${ti}).</div>`);
   if(S.press>35) out.push(`<div class="no">Safety: excess pressure on the globe distorts the measurement.</div>`);
@@ -1000,6 +1021,11 @@ const CASES=[
   v:"A 40-year-old was struck in the right eye by a ball. The globe is intact on exam, but vision is blurred and the iris trembles with eye movement.",
   p:{path:"lens",icp:9,paco2:40,hours:0,base:4.5}, measure:false,
   qs:[{q:"Diagnosis?",o:DX_OPTS,a:3,e:"The lens is no longer behind the iris; it has dropped posteriorly into the vitreous. Compare with the other eye."}]},
+ {title:"Is that dark stripe the nerve?",
+  v:"A colleague shows you a frozen image: a black tube runs straight down from the optic disc and gets wider as it goes deeper. They measured it at 5.8 mm and are worried about raised ICP. Scan the right eye yourself: rock and fan off axis, then turn on color Doppler briefly.",
+  p:{path:"normal",icp:9,paco2:40,hours:0,base:4.6}, measure:false,
+  qs:[{q:"What is the widening black tube?",o:["The optic nerve sheath, dilated from raised ICP","Shadow artifact from the lamina cribrosa","An extraocular muscle","Central retinal artery occlusion"],a:1,e:"A dark stripe that runs straight down the beam and widens with depth is shadow from the lamina cribrosa, not the nerve. The real nerve is the hypoechoic stripe that contains the central retinal artery and vein on color Doppler, bordered by the hyperechoic sheath."},
+      {q:"How do you confirm which stripe is the optic nerve?",o:["Increase the gain until it looks wider","Briefly turn on color Doppler: the central retinal artery and vein run through the nerve","Press harder to bring the nerve closer","Measure the widest dark area you can find"],a:1,e:"Color Doppler shows the retinal vessels running down the middle of the nerve for about 5 mm. Measure perpendicular to them, outer edge to outer edge of the hyperechoic sheath, and keep Doppler time short."}]},
  {title:"Penetrating eye injury",
   v:"A 25-year-old was hit by a metal fragment while grinding. Teardrop-shaped pupil, 360-degree subconjunctival hemorrhage, and a shallow anterior chamber in the right eye.",
   p:{path:"normal",icp:9,paco2:40,hours:0,base:4.5}, measure:false, rupture:true,
@@ -1081,7 +1107,7 @@ try{ const nm=localStorage.getItem("ocularSimName"); if(nm) $("learnerName").val
 $("learnerName").addEventListener("input",e=>{ try{ localStorage.setItem("ocularSimName",e.target.value); }catch(err){} });
 
 // ---------- anatomy tab ----------
-const ANAT={lid:["Eyelid","Scanned through the closed lid with a transparent dressing and gel."],cornea:["Cornea","Thin curved hypoechoic band with bright surfaces at the top of the image."],ac:["Anterior chamber","Anechoic fluid between cornea and iris."],iris:["Iris","Bright lines on either side of the pupil."],ciliary:["Ciliary body","Echogenic tissue at the lens periphery."],lens:["Lens","Bright anterior and posterior capsule lines with an anechoic center."],vitreous:["Vitreous body","Anechoic gel filling the globe. Look here for detachments and hemorrhage."],retina:["Retina","Inner layer of the bright posterior wall. A detached retina stays tethered at the disc."],choroid:["Choroid","Vascular layer between retina and sclera; part of the bright posterior wall."],sclera:["Sclera","Tough outer coat; brightest at the back of the globe."],disc:["Optic disc","Where the nerve enters the globe: point A for ONSD. Bulges forward with papilledema (ODE)."],sheath:["Dural sheath","The outer bright line of the stripe. ONSD is measured outer wall to outer wall."],csf:["CSF space","Subarachnoid space that communicates with intracranial CSF. It distends with raised ICP."],nerve:["Optic nerve","Hypoechoic stripe behind the globe. The central retinal artery runs in its center (CRAO spot sign)."],fat:["Retrobulbar fat","Bright, heterogeneous tissue that frames the dark nerve stripe."],muscle:["Extraocular muscle","Hypoechoic bands lateral to the nerve; do not mistake them for the sheath."]};
+const ANAT={lid:["Eyelid","Scanned through the closed lid with a transparent dressing and gel."],cornea:["Cornea","Thin curved hypoechoic band with bright surfaces at the top of the image."],ac:["Anterior chamber","Anechoic fluid between cornea and iris."],iris:["Iris","Bright lines on either side of the pupil."],ciliary:["Ciliary body","Echogenic tissue at the lens periphery."],lens:["Lens","Bright anterior and posterior capsule lines with an anechoic center."],vitreous:["Vitreous body","Anechoic gel filling the globe. Look here for detachments and hemorrhage."],retina:["Retina","Inner layer of the bright posterior wall. A detached retina stays tethered at the disc."],choroid:["Choroid","Vascular layer between retina and sclera; part of the bright posterior wall."],sclera:["Sclera","Tough outer coat; brightest at the back of the globe."],disc:["Optic disc","Where the nerve enters the globe: point A for ONSD. Bulges forward with papilledema (ODE)."],sheath:["Dural sheath","The outer bright line of the stripe. ONSD is measured outer wall to outer wall."],csf:["CSF space","Subarachnoid space that communicates with intracranial CSF. It distends with raised ICP."],nerve:["Optic nerve","Hypoechoic stripe behind the globe, bordered by the hyperechoic sheath. The central retinal artery and vein run down its center (color Doppler confirms it is the nerve; CRAO spot sign)."],fat:["Retrobulbar fat","Bright, heterogeneous tissue that frames the dark nerve stripe."],vessels:["Central retinal artery and vein","Run down the middle of the optic nerve for the first few millimeters behind the globe. On color Doppler they appear as a red and a blue line inside the dark stripe, which proves you are looking at the nerve and not at shadow artifact."],muscle:["Extraocular muscle","Hypoechoic bands lateral to the nerve; do not mistake them for the sheath."]};
 (function(){
   const fig=$("anatFig"), chips=$("anatChips");
   chips.innerHTML=Object.entries(ANAT).map(([k,v])=>`<button data-s="${k}">${v[0]}</button>`).join("");
@@ -1097,6 +1123,7 @@ const ANAT={lid:["Eyelid","Scanned through the closed lid with a transparent dre
   fig.querySelectorAll(".st").forEach(g=>{ g.style.cursor="pointer"; g.addEventListener("click",()=>sel(g.dataset.s)); });
   const seg=$("mSeg"); seg.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{ seg.querySelectorAll("button").forEach(x=>x.classList.remove("on")); b.classList.add("on"); const err=b.dataset.v==="err"; $("mErr").style.display=err?"":"none"; $("mOk").style.display=err?"none":""; }));
   $("papChk").addEventListener("change",e=>{ const p=e.target.checked; $("usNerveP").style.display=p?"":"none"; $("usNerveN").style.display=p?"none":""; $("onsdP").style.display=p?"":"none"; $("onsdN").style.display=p?"none":""; $("odeLbl").style.display=p?"":"none"; });
+  $("dopChk").addEventListener("change",e=>{ $("dopG").style.display=e.target.checked?"":"none"; });
   $("tryLab").addEventListener("click",()=>{ document.querySelector('nav.tabs button[data-tab="lab"]').click(); if(!S.labels){$("labelChk").click();} if(!S.guide){$("guideChk").click();} window.scrollTo(0,0); });
 })();
 
