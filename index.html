@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ocular and Optic Nerve Sheath POCUS Simulator</title>
+<style>
+:root{
+  --bg:#0d1117; --panel:#161b22; --panel2:#1c2330; --line:#2d3644; --text:#e6edf3; --muted:#9aa7b4;
+  --accent:#4fb3d9; --accent2:#7ee0a1; --warn:#f2b84b; --bad:#ff6b6b; --good:#5fd38d;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+header{padding:14px 18px 6px;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px}
+header h1{font-size:19px;margin:0;font-weight:650;letter-spacing:.2px}
+header .sub{color:var(--muted);font-size:12.5px}
+nav.tabs{display:flex;gap:4px;padding:8px 14px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+nav.tabs button{background:none;border:1px solid transparent;border-bottom:none;color:var(--muted);padding:8px 14px;border-radius:8px 8px 0 0;cursor:pointer;font-size:14px}
+nav.tabs button.on{background:var(--panel);color:var(--text);border-color:var(--line)}
+main{padding:14px;max-width:1280px;margin:0 auto}
+.layout{display:grid;grid-template-columns:minmax(300px,560px) 1fr;gap:14px;align-items:start}
+@media (max-width:900px){.layout{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:12px}
+.card h3{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.8px;color:var(--accent)}
+.screen{position:relative;background:#000;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+#us{display:block;width:100%;touch-action:none;cursor:crosshair}
+.screenbar{display:flex;flex-wrap:wrap;gap:6px;padding:8px;background:var(--panel2);border-top:1px solid var(--line)}
+button.b{background:#243042;color:var(--text);border:1px solid #34445a;border-radius:8px;padding:7px 11px;cursor:pointer;font-size:13px}
+button.b:hover{background:#2b3a50}
+button.b.on{background:var(--accent);color:#04121a;border-color:var(--accent);font-weight:600}
+button.b.primary{background:#2a6f8f;border-color:#3a89ad}
+button.b.warn{background:#5a3b12;border-color:#8a5c1d}
+button.b:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;align-items:center;gap:8px;margin:6px 0;flex-wrap:wrap}
+.row:has(input[type=range]){flex-wrap:nowrap}
+.row label{min-width:104px;color:var(--muted);font-size:12.5px}
+.row input[type=range]{flex:1;min-width:70px;accent-color:var(--accent)}
+.row .val{min-width:58px;font-size:12.5px;text-align:right;font-variant-numeric:tabular-nums}
+select{background:#0f1520;color:var(--text);border:1px solid #34445a;border-radius:7px;padding:6px 8px;font-size:13px}
+.seg{display:inline-flex;border:1px solid #34445a;border-radius:8px;overflow:hidden}
+.seg button{background:#1a2230;color:var(--muted);border:none;padding:6px 10px;cursor:pointer;font-size:12.5px;border-right:1px solid #34445a}
+.seg button:last-child{border-right:none}
+.seg button.on{background:var(--accent);color:#04121a;font-weight:600}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:1100px){.grid2{grid-template-columns:1fr}}
+.pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:600}
+.pill.good{background:#173d27;color:var(--good)} .pill.warn{background:#463411;color:var(--warn)} .pill.bad{background:#4a1d1d;color:var(--bad)}
+.fb{font-size:13px;margin-top:8px}
+.fb div{margin:3px 0}
+.ok{color:var(--good)} .mid{color:var(--warn)} .no{color:var(--bad)}
+table.log{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:6px}
+table.log th,table.log td{border-bottom:1px solid var(--line);padding:4px 6px;text-align:left}
+table.log th{color:var(--muted);font-weight:500}
+.muted{color:var(--muted)}
+.small{font-size:12px}
+.truth{background:#101a14;border:1px dashed #2f5d40;border-radius:8px;padding:8px;margin-top:8px;font-size:12.5px}
+.vignette{background:var(--panel2);border-left:3px solid var(--accent);padding:10px 12px;border-radius:6px;margin:8px 0}
+.q{margin:10px 0}
+.q .opt{display:block;margin:4px 0;padding:7px 10px;border:1px solid #34445a;border-radius:8px;cursor:pointer;background:#121924}
+.q .opt:hover{border-color:var(--accent)}
+.q .opt.sel{border-color:var(--accent);background:#14283a}
+.q .opt.right{border-color:var(--good);background:#12301f}
+.q .opt.wrong{border-color:var(--bad);background:#341616}
+.expl{background:#111a24;border:1px solid var(--line);border-radius:8px;padding:9px 11px;margin-top:8px;font-size:13px}
+.learn h2{font-size:17px;margin:18px 0 8px;color:var(--accent)}
+.learn h2:first-child{margin-top:0}
+.learn table{border-collapse:collapse;width:100%;margin:6px 0 10px;font-size:13px}
+.learn td,.learn th{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+.learn th{background:var(--panel2)}
+.learn li{margin:3px 0}
+.learn a{color:var(--accent)}
+.overlaymsg{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(0,0,0,.82);text-align:center;padding:20px}
+.overlaymsg p{max-width:340px;color:var(--muted);margin:0}
+.hidden{display:none!important}
+.probeGrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+@media (max-width:700px){.probeGrid{grid-template-columns:1fr}}
+.probefig{width:100%;max-width:380px;height:auto;display:block;margin:0 0 6px}
+.safety{font-variant-numeric:tabular-nums}
+.learnerBar{margin-left:auto;display:flex;align-items:center;gap:8px}
+.learnerBar input{background:#0f1520;color:var(--text);border:1px solid #34445a;border-radius:7px;padding:6px 8px;font-size:13px;width:150px}
+.anatGrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+@media (max-width:1000px){.anatGrid{grid-template-columns:1fr}}
+#anatFig,#usFig{width:100%;height:auto;display:block;border-radius:10px}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
+.chips button{background:#1a2230;color:var(--muted);border:1px solid #34445a;border-radius:999px;padding:3px 9px;font-size:12px;cursor:pointer}
+.chips button.on{background:var(--accent);color:#04121a;border-color:var(--accent);font-weight:600}
+.anat .lbl line{stroke:#9aa7b4;stroke-width:1}
+.anat .st{transition:opacity .2s}
+.anat.hl .st{opacity:.18}
+.anat.hl .st.on{opacity:1}
+.summary table{width:100%;border-collapse:collapse;font-size:12.5px;margin:6px 0}
+.summary td,.summary th{border-bottom:1px solid var(--line);padding:4px 6px;text-align:left}
+footer{color:var(--muted);font-size:11.5px;text-align:center;padding:14px}
+.scorebar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+kbd{background:#222b38;border:1px solid #3a4658;border-radius:4px;padding:0 4px;font-size:11px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Ocular and Optic Nerve Sheath POCUS Simulator</h1>
+  <span class="sub">Synthetic B-mode, ONSD calipers, ocular pathology and case challenge. For education only.</span>
+  <div class="learnerBar">
+    <label for="learnerName" class="small muted">Learner</label>
+    <input id="learnerName" type="text" maxlength="40" placeholder="Name or initials" autocomplete="off">
+    <button class="b" id="newLearner" title="Clear measurements, calipers and case progress for the next person">New learner</button>
+  </div>
+</header>
+<nav class="tabs">
+  <button data-tab="lab" class="on">Scan Lab</button>
+  <button data-tab="cases">Case Challenge</button>
+  <button data-tab="anatomy">Anatomy</button>
+  <button data-tab="learn">Learn</button>
+</nav>
+<main>
+  <div id="scanView" class="layout">
+    <!-- LEFT: screen -->
+    <div>
+      <div class="card" id="probeCard">
+          <h3>Probe and patient</h3>
+          <div class="probeGrid"><div>
+          <div class="row"><label>Eye</label><div class="seg" id="eyeSeg"><button data-v="R" class="on">Right</button><button data-v="L">Left</button></div></div>
+          <div class="row"><label>Plane</label><div class="seg" id="planeSeg"><button data-v="T" class="on">Transverse</button><button data-v="S">Sagittal</button></div></div>
+          <div class="row"><label>Patient gaze</label><div class="seg" id="gazeSeg"><button data-v="C" class="on">Ahead</button><button data-v="L">Left</button><button data-v="R">Right</button><button data-v="U">Up</button><button data-v="D">Down</button></div></div>
+          <div class="row"><label title="In-plane tilt along the probe's long axis, toward or away from the indicator">Probe rock (deg)</label><input type="range" id="rock" min="-25" max="25" step="1" value="0"><span class="val" id="rockV"></span></div>
+          <div class="row"><label title="Out-of-plane tilt across the probe's short axis, sweeping the beam toward the brow or the cheek">Probe fan (deg)</label><input type="range" id="fan" min="-12" max="12" step="0.5" value="0"><span class="val" id="fanV"></span></div>
+          <div class="row"><label>Probe pressure</label><input type="range" id="press" min="0" max="100" step="1" value="10"><span class="val" id="pressV"></span></div>
+          <div class="row"><label>Air under dressing</label><input type="checkbox" id="airChk"></div>
+          </div><div>
+          <svg id="probeFig" class="probefig" viewBox="0 0 300 150" aria-label="Probe rock and fan diagram"></svg>
+          <div class="small muted" id="alignTxt"></div>
+          </div></div>
+        </div>
+      <div class="screen" id="screen">
+        <canvas id="us" aria-label="Simulated ocular ultrasound image"></canvas>
+        <div id="noProbe" class="overlaymsg hidden">
+          <strong>Probe not on the eye</strong>
+          <p>Read the vignette first. If ocular ultrasound is appropriate, place the probe on the closed eyelid over a transparent dressing with generous gel.</p>
+          <button class="b primary" id="placeBtn">Place probe on eyelid</button>
+        </div>
+      </div>
+      <div class="screenbar">
+        <button class="b" id="freezeBtn">Freeze <kbd>F</kbd></button>
+        <button class="b" id="calBtn" title="Calipers work on a frozen image">Calipers</button>
+        <button class="b" id="undoBtn">Undo caliper</button>
+        <button class="b" id="clearBtn">Clear</button>
+        <button class="b primary" id="checkBtn">Check my measurement</button>
+        <button class="b" id="saveBtn">Save ONSD to log</button>
+        <button class="b" id="moveBtn">Ask patient to look side to side</button>
+      </div>
+      <div class="card" style="margin-top:12px">
+        <h3>Measurement feedback</h3>
+        <div id="feedback" class="fb muted">Freeze the image, choose Calipers, then click twice to place each caliper. Place one caliper 3 mm straight back from the posterior globe along the nerve, then a second caliper across the sheath, outer wall to outer wall, at that depth.</div>
+      </div>
+      <div class="card">
+        <h3>ONSD log</h3>
+        <div id="logBox" class="small muted">No measurements saved yet.</div>
+      </div>
+    </div>
+
+    <!-- RIGHT: controls -->
+    <div>
+      <div id="labPatient" class="card">
+        <h3>Patient and physiology</h3>
+        <div class="row"><label>Ocular finding</label>
+          <select id="pathSel">
+            <option value="normal">Normal globe</option>
+            <option value="rd">Retinal detachment</option>
+            <option value="pvd">Posterior vitreous detachment</option>
+            <option value="vh">Vitreous hemorrhage</option>
+            <option value="lens">Posterior lens dislocation</option>
+            <option value="crao">Central retinal artery occlusion (spot sign)</option>
+          </select></div>
+        <div class="row"><label>ICP (mmHg)</label><input type="range" id="icp" min="3" max="50" step="1" value="10"><span class="val" id="icpV"></span></div>
+        <div class="row"><label>PaCO2 (mmHg)</label><input type="range" id="paco2" min="25" max="75" step="1" value="40"><span class="val" id="paco2V"></span></div>
+        <div class="row"><label>Hours since ICP rise</label><input type="range" id="hours" min="0" max="168" step="1" value="0"><span class="val" id="hoursV"></span></div>
+        <div class="row"><label>Baseline sheath (individual)</label><input type="range" id="base" min="3.9" max="5.3" step="0.05" value="4.6"><span class="val" id="baseV"></span></div>
+        <div class="row"><label>Show true values</label><input type="checkbox" id="truthChk"></div>
+        <div id="truthBox" class="truth hidden"></div>
+      </div>
+
+      <div id="caseCard" class="card hidden">
+        <div class="scorebar"><h3 id="caseTitle" style="margin:0">Case</h3><span id="scoreTxt" class="pill good">Score 0</span></div>
+        <div id="caseVignette" class="vignette"></div>
+        <div id="caseQs"></div>
+        <div class="row" style="margin-top:10px">
+          <button class="b primary" id="submitCase">Submit answers</button>
+          <button class="b" id="nextCase">Next case</button>
+          <button class="b" id="restartCases">Restart</button>
+        </div>
+        <div id="caseResult"></div>
+      </div>
+
+      <div>
+        <div class="card">
+          <h3>Machine</h3>
+          <div class="row"><label>Preset</label>
+            <select id="presetSel">
+              <option value="oph">Ophthalmic</option>
+              <option value="spmin">Small parts, output at minimum</option>
+              <option value="spdef">Small parts, default output</option>
+              <option value="vasc">Vascular, default output</option>
+            </select></div>
+          <div class="row"><label>Depth</label><div class="seg" id="depthSeg"><button data-v="35">3.5</button><button data-v="45" class="on">4.5</button><button data-v="55">5.5</button></div><span class="muted small">cm</span></div>
+          <div class="row"><label>Gain</label><input type="range" id="gain" min="0" max="100" step="1" value="50"><span class="val" id="gainV"></span></div>
+          <div class="row"><label>Color Doppler</label><input type="checkbox" id="colorChk"></div>
+          <div class="row"><label>Anatomy labels</label><input type="checkbox" id="labelChk"></div>
+          <div class="row" id="guideRow"><label>Measurement guide</label><input type="checkbox" id="guideChk"></div>
+          <div class="row"><label>Output</label><span id="safetyTxt" class="safety"></span></div>
+          <div id="safetyMsg" class="small"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="anatomyView" class="hidden">
+    <div class="anatGrid">
+      <div class="card">
+        <h3>Eye and orbit anatomy (transverse section)</h3>
+        <p class="small muted" style="margin:0 0 6px">Tap a structure name to highlight it.</p>
+        <div id="anatChips" class="chips"></div>
+        <svg id="anatFig" class="anat" viewBox="0 0 520 500" role="img" aria-label="Labeled cross-section of the eye and optic nerve">
+          <defs>
+            <linearGradient id="fatG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3d27a"/><stop offset="1" stop-color="#d9b75e"/></linearGradient>
+          </defs>
+          <rect width="520" height="500" rx="12" fill="#0f1520"/>
+          <!-- probe and lid -->
+          <rect x="170" y="8" width="100" height="16" rx="4" fill="#4fb3d9" opacity=".85"/>
+          <text x="220" y="20" text-anchor="middle" font-size="10" fill="#04121a" font-weight="700">Linear probe</text>
+          <rect x="150" y="24" width="140" height="14" fill="#8fa6d6" opacity=".85"/><line x1="290" y1="31" x2="410" y2="22" stroke="#9aa7b4"/><text x="414" y="26" font-size="11.5" fill="#e6edf3">Gel</text>
+          <g class="st" data-s="lid"><path d="M120 46 Q220 22 320 46 L320 58 Q220 36 120 58 Z" fill="#d9a38a"/></g>
+          <!-- retrobulbar fat -->
+          <g class="st" data-s="fat"><path d="M150 268 Q220 330 290 268 L380 495 L60 495 Z" fill="url(#fatG)" opacity=".9"/></g>
+          <!-- extraocular muscles -->
+          <g class="st" data-s="muscle"><ellipse cx="108" cy="380" rx="15" ry="80" fill="#c0504d" transform="rotate(14 108 380)"/><ellipse cx="332" cy="380" rx="15" ry="80" fill="#c0504d" transform="rotate(-14 332 380)"/></g>
+          <!-- sheath, CSF, nerve -->
+          <g class="st" data-s="sheath"><path d="M193 296 C190 318 192 330 195 345 L198 495 L242 495 L245 345 C248 330 250 318 247 296 Z" fill="#cfc8bb"/></g>
+          <g class="st" data-s="csf"><path d="M199 298 C197 318 199 330 201 345 L203 495 L237 495 L239 345 C241 330 243 318 241 298 Z" fill="#9fd3f0"/></g>
+          <g class="st" data-s="nerve"><rect x="207" y="298" width="26" height="197" fill="#f0e2bd"/><path d="M216 300 L216 400 L196 420" stroke="#d23c3c" stroke-width="2.2" fill="none"/></g>
+          <!-- globe wall layers -->
+          <g class="st" data-s="sclera"><circle cx="220" cy="175" r="124" fill="none" stroke="#f1eee6" stroke-width="9"/></g>
+          <g class="st" data-s="choroid"><circle cx="220" cy="175" r="118" fill="none" stroke="#8b3a3a" stroke-width="4"/></g>
+          <g class="st" data-s="retina"><circle cx="220" cy="175" r="115" fill="#e9f2f6" stroke="#e8a33d" stroke-width="3"/></g>
+          <g class="st" data-s="vitreous"><circle cx="220" cy="175" r="112" fill="#dcebf2"/></g>
+          <!-- anterior segment -->
+          <g class="st" data-s="cornea"><path d="M160 72 Q220 22 280 72" fill="none" stroke="#9fd3f0" stroke-width="6"/></g>
+          <g class="st" data-s="ac"><path d="M166 74 Q220 34 274 74 L274 82 L166 82 Z" fill="#bfe3f5"/></g>
+          <g class="st" data-s="iris"><rect x="128" y="80" width="68" height="7" rx="3" fill="#5b7fa6"/><rect x="244" y="80" width="68" height="7" rx="3" fill="#5b7fa6"/></g>
+          <g class="st" data-s="ciliary"><ellipse cx="122" cy="96" rx="12" ry="17" fill="#b46a6a"/><ellipse cx="318" cy="96" rx="12" ry="17" fill="#b46a6a"/></g>
+          <g class="st" data-s="lens"><ellipse cx="220" cy="105" rx="46" ry="20" fill="#f6e7a8" stroke="#c9b25d" stroke-width="2"/></g>
+          <g class="st" data-s="disc"><path d="M206 290 Q220 282 234 290" fill="#f2c27a" stroke="#e8a33d" stroke-width="2"/></g>
+          <!-- labels -->
+          <g class="lbl" font-size="11.5" fill="#e6edf3">
+            <line x1="280" y1="40" x2="410" y2="40"/><text x="414" y="44">Eyelid</text>
+            <line x1="262" y1="55" x2="410" y2="62"/><text x="414" y="66">Cornea</text>
+            <line x1="238" y1="66" x2="410" y2="84"/><text x="414" y="88">Anterior chamber</text>
+            <line x1="300" y1="84" x2="410" y2="106"/><text x="414" y="110">Iris</text>
+            <line x1="330" y1="100" x2="410" y2="128"/><text x="414" y="132">Ciliary body</text>
+            <line x1="262" y1="108" x2="410" y2="150"/><text x="414" y="154">Lens</text>
+            <line x1="300" y1="200" x2="410" y2="186"/><text x="414" y="190">Vitreous body</text>
+            <line x1="327" y1="230" x2="410" y2="214"/><text x="414" y="218">Retina</text>
+            <line x1="333" y1="242" x2="410" y2="236"/><text x="414" y="240">Choroid</text>
+            <line x1="338" y1="256" x2="410" y2="258"/><text x="414" y="262">Sclera</text>
+            <line x1="234" y1="288" x2="410" y2="290"/><text x="414" y="294">Optic disc</text>
+            <line x1="245" y1="330" x2="410" y2="322"/><text x="414" y="326">Dural sheath</text>
+            <line x1="239" y1="360" x2="410" y2="350"/><text x="414" y="354">CSF space</text>
+            <line x1="228" y1="390" x2="410" y2="378"/><text x="414" y="382">Optic nerve</text>
+            <line x1="200" y1="418" x2="150" y2="470"/><text x="20" y="486">Central retinal artery</text>
+            <line x1="300" y1="440" x2="410" y2="420"/><text x="414" y="424">Retrobulbar fat</text>
+            <line x1="100" y1="330" x2="40" y2="300"/><text x="12" y="292">Extraocular</text><text x="12" y="306">muscle</text>
+          </g>
+        </svg>
+        <div id="anatInfo" class="expl small">The optic nerve sheath is a continuation of the dura. The subarachnoid space around the nerve communicates with the intracranial CSF, so raised ICP distends the sheath, most of all just behind the globe.</div>
+      </div>
+
+      <div class="card">
+        <h3>Ultrasound appearance and where to measure</h3>
+        <div class="row" style="margin:0 0 6px">
+          <div class="seg" id="mSeg"><button data-v="ok" class="on">Correct technique</button><button data-v="err">Common errors</button></div>
+          <label class="small" style="min-width:0"><input type="checkbox" id="papChk"> Show papilledema</label>
+        </div>
+        <svg id="usFig" viewBox="0 0 520 500" role="img" aria-label="Ultrasound schematic showing ONSD measurement location">
+          <defs>
+            <linearGradient id="fatU" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9a9a9a"/><stop offset="1" stop-color="#3a3a3a"/></linearGradient>
+            <marker id="arr" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#f2b84b"/></marker>
+          </defs>
+          <rect width="520" height="500" rx="12" fill="#000"/>
+          <path d="M150 268 Q220 330 290 268 L380 495 L60 495 Z" fill="url(#fatU)"/>
+          <circle cx="220" cy="175" r="121" fill="#000" stroke="#d6d6d6" stroke-width="10"/>
+          <path d="M163 70 Q220 30 277 70" fill="none" stroke="#e0e0e0" stroke-width="3"/>
+          <ellipse cx="220" cy="105" rx="46" ry="20" fill="none" stroke="#efefef" stroke-width="4"/>
+          <rect x="128" y="80" width="68" height="5" fill="#cfcfcf"/><rect x="244" y="80" width="68" height="5" fill="#cfcfcf"/>
+          <g id="usNerveN"><path d="M197 300 C194 318 196 330 199 345 L202 495 L238 495 L241 345 C244 330 246 318 243 300 Z" fill="#0b0b0b" stroke="#e8e8e8" stroke-width="2.5"/></g>
+          <g id="usNerveP" style="display:none"><path d="M189 300 C184 318 186 332 191 348 L196 495 L244 495 L249 348 C254 332 256 318 251 300 Z" fill="#0b0b0b" stroke="#e8e8e8" stroke-width="2.5"/><path d="M204 296 Q220 276 236 296 Z" fill="#9d9d9d"/></g>
+          <text x="20" y="34" fill="#9aa7b4" font-size="11">Scale: 10 px = 1 mm (globe about 24 mm)</text>
+          <g id="mOk" font-size="11.5">
+            <circle cx="220" cy="296" r="4" fill="#f2b84b"/><text x="120" y="290" fill="#f2b84b" font-weight="700">A</text><line x1="133" y1="288" x2="212" y2="295" stroke="#f2b84b" stroke-dasharray="3 3"/>
+            <line x1="220" y1="296" x2="220" y2="326" stroke="#f2b84b" stroke-width="2.5" marker-end="url(#arr)"/>
+            <text x="228" y="316" fill="#f2b84b" font-weight="700">3 mm</text>
+            <text x="120" y="330" fill="#f2b84b" font-weight="700">B</text>
+            <g id="onsdN"><line x1="197.5" y1="326" x2="242.5" y2="326" stroke="#ffeb3b" stroke-width="2.5"/><path d="M197.5 320v12M242.5 320v12" stroke="#ffeb3b" stroke-width="2.5"/></g>
+            <g id="onsdP" style="display:none"><line x1="187" y1="326" x2="253" y2="326" stroke="#ffeb3b" stroke-width="2.5"/><path d="M187 320v12M253 320v12" stroke="#ffeb3b" stroke-width="2.5"/></g>
+            <line x1="258" y1="326" x2="300" y2="350" stroke="#ffeb3b"/><text x="304" y="350" fill="#ffeb3b" font-weight="700">ONSD: outer wall</text><text x="304" y="364" fill="#ffeb3b" font-weight="700">to outer wall</text>
+            <g id="odeLbl" style="display:none"><line x1="220" y1="296" x2="220" y2="281" stroke="#7ee0a1" stroke-width="2.5"/><line x1="214" y1="281" x2="226" y2="281" stroke="#7ee0a1" stroke-width="2"/><line x1="226" y1="284" x2="352" y2="270" stroke="#7ee0a1"/><text x="356" y="266" fill="#7ee0a1" font-weight="700">ODE: disc dome</text><text x="356" y="280" fill="#7ee0a1">height above retina</text></g>
+            <text x="304" y="394" fill="#cfd8e3">Perpendicular to the nerve axis</text>
+            <text x="304" y="410" fill="#cfd8e3">Hypoechoic stripe only, no fat</text>
+          </g>
+          <g id="mErr" style="display:none" font-size="11.5">
+            <line x1="200" y1="306" x2="240" y2="306" stroke="#ff6b6b" stroke-width="2.5" stroke-dasharray="4 2"/><text x="304" y="300" fill="#ff6b6b">1. Too close (1 mm): narrower,</text><text x="318" y="314" fill="#ff6b6b">underestimates</text><line x1="242" y1="306" x2="300" y2="300" stroke="#ff6b6b"/>
+            <line x1="203" y1="326" x2="237" y2="326" stroke="#ff6b6b" stroke-width="2.5" stroke-dasharray="4 2"/><text x="304" y="336" fill="#ff6b6b">2. Inner wall to inner wall</text><line x1="239" y1="326" x2="300" y2="332" stroke="#ff6b6b"/>
+            <line x1="185" y1="326" x2="255" y2="326" stroke="#ff6b6b" stroke-width="1.5" stroke-dasharray="2 3" transform="translate(0 50)"/><text x="304" y="380" fill="#ff6b6b">3. Too deep (8 mm): past the</text><text x="318" y="394" fill="#ff6b6b">widest point</text><line x1="257" y1="376" x2="300" y2="376" stroke="#ff6b6b"/>
+            <line x1="174" y1="125" x2="174" y2="495" stroke="#ff6b6b" stroke-width="1.5" stroke-dasharray="6 4"/><text x="20" y="440" fill="#ff6b6b">4. Lens edge shadow</text><text x="20" y="454" fill="#ff6b6b">mistaken for the nerve</text>
+            <line x1="200" y1="300" x2="244" y2="350" stroke="#ff6b6b" stroke-width="2.5" stroke-dasharray="4 2"/><text x="20" y="400" fill="#ff6b6b">5. Oblique caliper or</text><text x="20" y="414" fill="#ff6b6b">oblique nerve (rock/fan)</text>
+          </g>
+        </svg>
+        <ol class="small" style="margin:8px 0 0;padding-left:18px">
+          <li><b>A:</b> find the posterior globe where the optic nerve enters (the optic disc).</li>
+          <li><b>A to B:</b> go 3 mm straight back along the nerve axis, where the sheath is widest.</li>
+          <li><b>At B:</b> measure perpendicular to the nerve, outer wall to outer wall of the hypoechoic stripe.</li>
+          <li>Align first: rock until the nerve is parallel to the beam, fan until the sheath is widest.</li>
+          <li>Repeat in the transverse and sagittal planes, scan both eyes, and average (best three).</li>
+          <li>If the ONSD is 5 to 6 mm, measure the optic disc elevation (ODE).</li>
+        </ol>
+        <div class="row" style="margin-top:10px"><button class="b primary" id="tryLab">Practice this in Scan Lab</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="learnView" class="learn hidden">
+    <div class="card">
+      <h2>Technique (rule of 3 x 5)</h2>
+      <ol>
+        <li><b>Prepare:</b> head of bed about 45 degrees. Close the eye, cover it with a large transparent waterproof dressing, push out the air, and apply a generous layer of water-based gel.</li>
+        <li><b>Machine:</b> high-frequency linear probe (7.5 to 10 MHz or higher). Use the ophthalmic preset. If there is none, use small parts with output turned to the minimum. Keep MI below 0.23 and TI at or below 1.0; Doppler raises power output, so use it briefly.</li>
+        <li><b>Probe:</b> pencil grip, indicator to the patient's right in the transverse plane, very light pressure, and the side of your hand braced on the cheek, nasal bridge or forehead.</li>
+        <li><b>Survey near to far:</b> lid, cornea, anterior chamber, iris, lens, vitreous, retina, then the optic nerve behind the globe. Scan both eyes.</li>
+        <li><b>Align:</b> rock the probe (often about 15 degrees laterally) or have the patient change gaze until the sheath runs parallel to the beam. An oblique nerve blurs the walls and invites edge artifact.</li>
+        <li><b>Measure:</b> from the posterior globe at the disc, go 3 mm straight back along the nerve. At that point, measure the sheath outer wall to outer wall. Repeat in the sagittal plane and average. Take several measurements and average the best three.</li>
+      </ol>
+    </div>
+    <div class="card">
+      <h2>Interpreting ONSD</h2>
+      <table>
+        <tr><th>ONSD</th><th>Teaching framework (NUEM SonoPro)</th></tr>
+        <tr><td>&lt; 5 mm</td><td>Likely normal ICP</td></tr>
+        <tr><td>5 to 6 mm</td><td>Indeterminate: look for optic disc elevation (papilledema)</td></tr>
+        <tr><td>&gt; 6 mm</td><td>Suggests elevated ICP</td></tr>
+      </table>
+      <ul>
+        <li>Published cutoffs vary (roughly 4.8 to 5.9 mm). In ICU studies of severe TBI against invasive ICP, the best cutoff was about 5.7 mm (Geeraerts 2007; Soldatos 2008), and ICP above 20 mmHg corresponds to roughly 5.7 to 6.0 mm (ASRA review).</li>
+        <li>Baseline sheath size varies between people: a value above 6 mm is not always pathologic, and below 5 mm does not guarantee normal ICP.</li>
+        <li>One ONSD value can correspond to an ICP range wider than 10 mmHg. Ultrasound gives snapshots, while ICP is dynamic (Geeraerts 2008).</li>
+        <li>ONSD responds within minutes, which makes serial measurement useful; a change of more than 5% between measurements has been treated as an unstable trend.</li>
+        <li>Hypercapnia raises ONSD (via ICP) and it returns toward baseline with hyperventilation. Acute blood pressure swings over 10% can also change it.</li>
+        <li>ONSD is a screening and trending tool. Strategies built only on noninvasive ICP estimates are not recommended in place of invasive monitoring when that is indicated.</li>
+      </ul>
+      <h2>Optic disc elevation (papilledema)</h2>
+      <ul>
+        <li>Measure the height of the disc dome above the surrounding retina.</li>
+        <li>ODE above 0.6 mm: sensitivity 82%, specificity 76% for fundoscopic disc edema. ODE of 1.0 mm or more: sensitivity 73%, specificity 100%.</li>
+        <li>Disc elevation lags ONSD by hours to days, so its absence does not exclude raised ICP. It is most helpful when ONSD is indeterminate.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>Normal echogenicity</h2>
+      <table>
+        <tr><th>Structure</th><th>Appearance</th></tr>
+        <tr><td>Cornea</td><td>Thin hypoechoic band with bright surfaces</td></tr>
+        <tr><td>Anterior chamber, vitreous</td><td>Anechoic</td></tr>
+        <tr><td>Iris, ciliary body, lens capsule</td><td>Hyperechoic</td></tr>
+        <tr><td>Retina, choroid, sclera</td><td>Hyperechoic posterior wall</td></tr>
+        <tr><td>Optic nerve</td><td>Anechoic or hypoechoic band bounded by bright lines</td></tr>
+        <tr><td>Retrobulbar fat</td><td>Heterogeneously hyperechoic</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h2>Ocular pathology in this simulator</h2>
+      <table>
+        <tr><th>Finding</th><th>Key features</th><th>Tip</th></tr>
+        <tr><td>Retinal detachment</td><td>Bright, thick, smooth, folded membrane that stays tethered at the optic disc</td><td>Moves less than vitreous detachment during eye movement</td></tr>
+        <tr><td>Posterior vitreous detachment</td><td>Thinner, freely mobile membrane that swirls with eye movement</td><td>Crosses the midline over the disc without attaching to it</td></tr>
+        <tr><td>Vitreous hemorrhage</td><td>Low-level mobile echoes in the vitreous, often dependent</td><td>Easy to miss at low gain: turn gain up</td></tr>
+        <tr><td>Lens dislocation</td><td>Lens displaced from behind the iris, here posteriorly into the vitreous</td><td>Compare with the other eye</td></tr>
+        <tr><td>Central retinal artery occlusion</td><td>Retrobulbar spot sign: bright dot in the center of the nerve just behind the globe; absent arterial color flow</td><td>High specificity, low sensitivity. Optic disc drusen can mimic it</td></tr>
+        <tr><td>Suspected globe rupture</td><td colspan="2">Absolute contraindication to ocular ultrasound. Do not scan: pressure can extrude intraocular contents. Shield the eye and consult ophthalmology.</td></tr>
+      </table>
+      <h2>Pitfalls</h2>
+      <ul>
+        <li><b>Edge artifact:</b> shadows from the lens edges run straight down the image and can be mistaken for the nerve sheath, especially when the nerve is oblique.</li>
+        <li><b>Too much pressure:</b> distorts the globe and the measurement and is hazardous.</li>
+        <li><b>Air under the dressing:</b> reverberation and dropout.</li>
+        <li><b>Unstable hand:</b> brace on the face; fatigue causes drift.</li>
+        <li><b>High output presets:</b> the eye is thermally sensitive tissue (avascular cornea and lens).</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>Sources</h2>
+      <ul class="small">
+        <li>NUEM Blog. SonoPro tips and tricks for evaluation of elevated intracranial pressure. <a href="https://www.nuemblog.com/blog/sonopro-tips-and-tricks-for-evaluation-of-elevated-intracranial-pressure" target="_blank" rel="noopener">nuemblog.com</a></li>
+        <li>ASRA Pain Medicine News. POCUS spotlight: point-of-care ultrasound of the eyes. May 2024. <a href="https://asra.com/news-publications/asra-newsletter/newsletter-item/asra-news/2024/05/02/pocus-spotlight-point-of-care-ultrasound-of-the-eyes" target="_blank" rel="noopener">asra.com</a></li>
+        <li>Geeraerts T, Duranteau J, Benhamou D. Ocular sonography in patients with raised intracranial pressure: the papilloedema revisited. Crit Care. 2008;12:150. doi:10.1186/cc6893</li>
+        <li>Soldatos T, et al. Optic nerve sonography in the diagnostic evaluation of adult brain injury. Crit Care. 2008;12:R67.</li>
+      </ul>
+      <p class="small muted">The image is synthetic and the physiology model (ICP to ONSD, disc elevation timing) is a simplified teaching model, not a validated predictor.</p>
+    </div>
+  </div>
+</main>
+<footer>Ocular and Optic Nerve Sheath POCUS Simulator. Educational tool; not for clinical decision-making.</footer>
+
+<script>
+(function(){
+"use strict";
+// ---------- constants ----------
+const W_MM = 38, PX_MM = 6, RW = W_MM*PX_MM; // render buffer 0.2 mm/px
+const R = 12;            // globe radius (inner retina), mm
+const WALL = 1.1;        // retina/choroid/sclera thickness
+const ZC = 16.4;         // globe center depth (cornea apex about 3 mm under the lid surface)
+const PRESETS = {
+  oph:  {name:"Ophthalmic", mi:0.17, ti:0.1, tiC:0.6, out:1.0},
+  spmin:{name:"Small parts (min output)", mi:0.21, ti:0.2, tiC:0.8, out:1.03},
+  spdef:{name:"Small parts", mi:0.92, ti:0.4, tiC:1.1, out:1.22},
+  vasc: {name:"Vascular", mi:1.25, ti:0.6, tiC:1.6, out:1.32}
+};
+
+// ---------- state ----------
+const S = {
+  mode:"lab", path:"normal", icp:10, paco2:40, hours:0, base:4.6,
+  eye:"R", plane:"T", gaze:"C", rock:0, press:10, air:false,
+  preset:"oph", depth:45, gain:50, color:false, labels:false, guide:false, truth:false,
+  frozen:false, calMode:false, cals:[], pending:null, hover:null,
+  moveT:-1, t0:performance.now(), theta0:{RT:8, LT:-8, RS:5, LS:5}, fan:0, fan0:1.5,
+  placed:true, log:[]
+};
+
+// ---------- physiology ----------
+function sig(x){return 1/(1+Math.exp(-(x-18)/4.5));}
+function icpEff(){ const d=S.paco2-40; return S.icp + (d>0?0.35*d:0.05*d); }
+function onsdTrue(eye,plane){
+  let v = S.base + 2.2*(sig(icpEff())-sig(8));
+  v = Math.max(S.base-0.15, Math.min(7.2, v));
+  if(plane==="S") v*=1.03;
+  if(eye==="L") v*=0.99;
+  return v;
+}
+function odeTrue(){
+  const tgt = Math.max(0, Math.min(1.6, (icpEff()-15)*0.1));
+  return tgt*(1-Math.exp(-S.hours/36));
+}
+
+// ---------- noise fields ----------
+const MAXROWS = 56*PX_MM;
+function mkRand(seed){ let s=seed>>>0; return ()=>{ s^=s<<13; s>>>=0; s^=s>>17; s^=s<<5; s>>>=0; return s/4294967296; }; }
+const rnd = mkRand(12345);
+function speckle(){
+  const raw=new Float32Array(RW*MAXROWS);
+  for(let i=0;i<raw.length;i++){ const u=Math.max(1e-6,rnd()); raw[i]=Math.sqrt(-2*Math.log(u))/1.2533; }
+  const out=new Float32Array(raw.length);
+  for(let y=0;y<MAXROWS;y++)for(let x=0;x<RW;x++){
+    let s=0,n=0;
+    for(let dx=-2;dx<=2;dx++){const xx=x+dx; if(xx>=0&&xx<RW){const w=[0.4,0.8,1.2,0.8,0.4][dx+2]; s+=raw[y*RW+xx]*w; n+=w;} }
+    out[y*RW+x]=0.15+0.85*(s/n);
+  }
+  return out;
+}
+const SPA=speckle(), SPB=speckle();
+// low-frequency texture for fat
+const TEX=(function(){
+  const g=24, grid=[]; for(let i=0;i<(g+1)*(g+1)*2;i++)grid.push(rnd());
+  const out=new Float32Array(RW*MAXROWS);
+  for(let y=0;y<MAXROWS;y++)for(let x=0;x<RW;x++){
+    const fx=x/RW*g, fy=y/MAXROWS*g*1.4; const ix=Math.floor(fx), iy=Math.floor(fy)%g, tx=fx-ix, ty=fy-Math.floor(fy);
+    const a=grid[iy*(g+1)+ix], b=grid[iy*(g+1)+ix+1], c=grid[(iy+1)*(g+1)+ix], d=grid[(iy+1)*(g+1)+ix+1];
+    const sx=tx*tx*(3-2*tx), sy=ty*ty*(3-2*ty);
+    const n1=(a*(1-sx)+b*sx)*(1-sy)+(c*(1-sx)+d*sx)*sy; const n2=grid[((y*7+x*3)%grid.length)]; out[y*RW+x]=0.7+0.45*n1+0.25*(n2-0.5);
+  }
+  return out;
+})();
+// vitreous hemorrhage particles (eye coords, polar)
+const VHP=[]; for(let i=0;i<1100;i++){ const r=Math.sqrt(rnd())*(R-0.6); const a=(rnd()*2-1)*Math.PI; const zr=r*Math.cos(a); const w=0.35+0.65*Math.max(0,(zr+R)/(2*R)); if(rnd()<w*0.95) VHP.push({r,a,b:0.05+0.11*rnd(),s:0.08+0.14*rnd()}); }
+
+// ---------- geometry helpers ----------
+const ss=(a,b,x)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t);};
+const mix=(a,b,t)=>a+(b-a)*t;
+function eyeTarget(){
+  const key=S.eye+S.plane; let g=0;
+  if(S.plane==="T"){ if(S.gaze==="L")g=-10; if(S.gaze==="R")g=10; }
+  else { if(S.gaze==="U")g=-10; if(S.gaze==="D")g=10; }
+  return S.theta0[key]+g;
+}
+function psiTarget(){ return eyeTarget()-S.rock; }
+function psiDeg(){ return (S.eyeA!=null?S.eyeA:eyeTarget())-(S.rockA!=null?S.rockA:S.rock); }
+function snapAnim(){ S.eyeA=eyeTarget(); S.rockA=S.rock; S.fanA=S.fan; }
+function geom(){
+  const eA=(S.eyeA!=null?S.eyeA:eyeTarget())*Math.PI/180, rA=(S.rockA!=null?S.rockA:S.rock)*Math.PI/180;
+  const psi=eA-rA, c=Math.cos(psi), s=Math.sin(psi);
+  const cE=Math.cos(eA), sE=Math.sin(eA), cR=Math.cos(rA), sR=Math.sin(rA);
+  const comp = S.press>35 ? 1+0.007*(S.press-35) : 1;
+  const fanNow=(S.fanA!=null?S.fanA:S.fan);
+  const fd=(fanNow-S.fan0)*Math.PI/180, cD=Math.cos(fd), sD=Math.sin(fd);
+  const G={psi,c,s,cE,sE,cR,sR,comp,u:{x:-s,z:c},v:{x:c,z:s},cD,sD,fanDeg:fanNow-S.fan0};
+  G.P=w2i(G,-R*sE,ZC+R*cE);   // disc / vitreoretinal interface at posterior pole (image coords)
+  return G;
+}
+// world (anatomy, probe upright) -> image (x along probe face, depth along beam)
+function w2i(G,xw,zw){ return {x:xw*G.cR+zw*G.sR, z:(-xw*G.sR+zw*G.cR)/G.cD}; }
+// eye coords -> image coords
+function toWorld(G,xe,ze){ return w2i(G, xe*G.cE-ze*G.sE, ZC+xe*G.sE+ze*G.cE); }
+// apparent sheath width when the scan plane is offset from the nerve center
+function apparentONSD(G,onsd){ const sP=G.P.z+3, y=sP*G.sD, h=onsd/2; return Math.abs(y)<h ? 2*Math.sqrt(h*h-y*y) : 0; }
+function sheathD(onsd,d){ return onsd*(0.80+0.20*Math.exp(-Math.pow((d-3)/2.8,2))); }
+
+// ---------- membranes / particles stamped per frame ----------
+const MEM=new Float32Array(RW*MAXROWS);
+function stamp(buf,x,z,rad,val,rows){
+  const cx=(x+W_MM/2)*PX_MM, cz=z*PX_MM, rp=rad*PX_MM+1;
+  for(let yy=Math.floor(cz-rp);yy<=Math.ceil(cz+rp);yy++){ if(yy<0||yy>=rows)continue;
+    for(let xx=Math.floor(cx-rp);xx<=Math.ceil(cx+rp);xx++){ if(xx<0||xx>=RW)continue;
+      const d=Math.hypot(xx+0.5-cx,yy+0.5-cz)/PX_MM; if(d<=rad+0.15){ const v=val*(d<rad?1:1-(d-rad)/0.15); const i=yy*RW+xx; if(v>buf[i])buf[i]=v; } } }
+}
+function stampMembranes(G,rows,mv){
+  MEM.fill(0,0,RW*rows);
+  if(S.path==="rd"){
+    // tethered at disc edge, runs to ora on one side, billows into vitreous
+    const a0=0.10, a1=1.05; // polar angles from posterior pole (rad)
+    for(let k=0;k<=160;k++){ const t=k/160;
+      const ang=mix(a0,a1,t); const base=R-0.05;
+      const bulge=3.2*Math.sin(Math.PI*t)+0.5*Math.sin(Math.PI*t*2)*Math.sin(Math.PI*t);
+      const wave=0.45*mv*Math.sin(Math.PI*t*2+performance.now()/180)*Math.sin(Math.PI*t);
+      const rr=base-bulge-wave; const xe=rr*Math.sin(ang), ze=rr*Math.cos(ang);
+      const w=toWorld(G,xe,ze); stamp(MEM,w.x,w.z,0.34,0.9,rows);
+    }
+    // folded second leaf
+    for(let k=0;k<=90;k++){ const t=k/90; const ang=mix(0.55,1.0,t); const rr=R-1.2-2.0*Math.sin(Math.PI*t)-0.3*mv*Math.sin(t*6+performance.now()/200);
+      const w=toWorld(G,rr*Math.sin(ang),rr*Math.cos(ang)); stamp(MEM,w.x,w.z,0.22,0.75,rows); }
+  }
+  if(S.path==="pvd"){
+    for(let k=0;k<=200;k++){ const t=k/200; const ang=mix(-0.95,0.95,t);
+      const rr=R-3.2-1.2*Math.cos(ang*1.6)+1.8*mv*Math.sin(t*7+performance.now()/260)*0.8;
+      const w=toWorld(G,rr*Math.sin(ang),rr*Math.cos(ang)); stamp(MEM,w.x,w.z,0.16,0.42,rows); }
+  }
+  if(S.path==="vh"){
+    const sw=0.35*mv*Math.sin(performance.now()/300);
+    for(const p of VHP){ const a=p.a+sw*(p.r/R); const xe=p.r*Math.sin(a), ze=p.r*Math.cos(a)+0.6*Math.abs(mv)*Math.sin(p.r+performance.now()/400);
+      if(Math.hypot(xe,ze)>R-0.4)continue; const w=toWorld(G,xe,ze); stamp(MEM,w.x,w.z,p.s,p.b,rows); }
+  }
+}
+
+// ---------- echo model ----------
+function lensParams(){
+  if(S.path==="lens") return {x:-3.2,z:7.0,rx:4.4,rz:2.0,tilt:0.5};
+  return {x:0,z:-8.1,rx:4.5,rz:2.0,tilt:0};   // lens 4 mm thick, front surface ~3.3 mm behind the corneal apex
+}
+const IRIS_Z=-10.3;          // iris plane, eye coords (globe center = 0, anterior negative)
+const CORNEA_R=7.8, CORNEA_C=-5.6; // corneal curvature; outer apex at -13.4
+function interior(G,xe,ze,y,lp,ode){
+  let v=0.028; const rho=Math.hypot(xe,y), yy2=y*y;
+  // lens: only the capsule surfaces facing the beam reflect (anterior bright, posterior fainter)
+  let lx=xe-lp.x, lz=ze-lp.z; if(lp.tilt){const ct=Math.cos(lp.tilt),st=Math.sin(lp.tilt); const a=lx*ct+lz*st, b=-lx*st+lz*ct; lx=a; lz=b;}
+  const q=Math.sqrt((lx*lx+yy2)/(lp.rx*lp.rx)+(lz*lz)/(lp.rz*lp.rz)); const dist=(q-1)*lp.rz;
+  if(Math.abs(dist)<0.5){ const gx=lx/(lp.rx*lp.rx), gz=lz/(lp.rz*lp.rz); const nz=Math.abs(gz)/Math.hypot(gx,gz);
+    const front = lz<0 ? 1 : 0.5;
+    v=Math.max(v,0.9*front*Math.pow(nz,6)*Math.exp(-Math.pow(dist/0.13,2))); }
+  if(q<1) v=Math.min(v,Math.max(0.02,v));
+  // iris: thin bright leaflets either side of the pupil
+  v=Math.max(v,0.45*Math.exp(-Math.pow((ze-IRIS_Z)/0.14,2))*ss(1.7,2.2,rho)*(1-ss(4.5,6.2,rho)));
+  // ciliary body
+  const cb=Math.pow((rho-6.7)/0.9,2)+Math.pow((ze+9.0)/1.5,2); v=Math.max(v,0.16*(1-ss(0.6,1.1,cb)));
+  // papilledema dome
+  if(ode>0.02){ const h=ode*Math.exp(-Math.pow(rho/1.3,2)); if(ze>R-h && ze<=R) v=Math.max(v,0.45); }
+  return v;
+}
+function retro(G,xe,ze,y,onsd,colorOn,phase){
+  const d=ze-R; let col=0;
+  // orbital soft tissue is dull gray; retrobulbar fat behind the globe is brighter and grainy
+  const cone=7+0.35*Math.max(0,d);
+  let v=0.09+0.15*(1-ss(cone-3,cone+2,Math.abs(xe)))*ss(-2,1,d);
+  v+=0.18*Math.exp(-Math.pow((d-0.6)/0.9,2))*(1-ss(6,10,Math.abs(xe)));   // bright fat interface just behind the posterior wall
+  const mus=Math.pow((Math.abs(xe)-10)/1.2,2)+Math.pow((d-13)/9,2);        // extraocular muscles
+  v=mix(Math.min(v,0.09),v,ss(0.6,1.2,mus));
+  v*=mix(1,0.55,ss(20,30,d));
+  const a=Math.hypot(xe,y);
+  if(d>0 && d<30 && a<5){
+    const D=sheathD(onsd,d), half=D/2, core=1.5, dura=0.45;
+    const ang=Math.abs(G.psi*180/Math.PI); const w=Math.min(0.45,0.12+ang*0.02);
+    const spec=0.6+0.4*Math.exp(-Math.pow(ang/9,2));
+    const coreV=0.05, csfV=0.02, duraV=0.5*spec;
+    let nv=mix(coreV,csfV,ss(core-w,core+w,a));
+    nv=mix(nv,duraV,ss(half-dura-w,half-dura+w,a));
+    nv=mix(nv,v,ss(half-w,half+w,a));
+    v=nv;
+    if(S.path==="crao"){ const dd=Math.hypot(a,d-2.0); if(dd<0.45) v=Math.max(v,0.98); }
+    if(colorOn && d>1.2 && d<10){
+      if(S.path!=="crao" && Math.hypot(xe+0.15,y)<0.32) col=1*(0.55+0.45*Math.max(0,Math.sin(phase)));
+      else if(Math.hypot(xe-0.6,y)<0.28) col=-(S.path==="crao"?0.35:0.7);
+    }
+  }
+  return [v,col];
+}
+// smooth globe wall: bright posterior retina/sclera, faint lateral walls, soft radial profile
+function wallVal(dz,r){ const cs=dz/r; const base = cs>0 ? 0.1+0.72*Math.pow(cs,3) : 0.09+0.1*Math.pow(-cs,3); return base*(0.55+0.45*Math.exp(-Math.pow((r-R-0.4)/0.45,2))); }
+// depth of the first globe surface (cornea or sclera) under lateral position rho
+function globeTop(rho){
+  const Ro=R+WALL; if(rho>=Ro) return -1;
+  const sc=ZC-Math.sqrt(Ro*Ro-rho*rho);
+  if(rho>=CORNEA_R-0.01) return sc;
+  const co=ZC+CORNEA_C-Math.sqrt(CORNEA_R*CORNEA_R-rho*rho);
+  const k=0.45, m=Math.min(co,sc); return m-k*Math.log(Math.exp(-(co-m)/k)+Math.exp(-(sc-m)/k)); // smooth minimum: no step at the limbus
+}
+
+// ---------- rendering ----------
+const cv=document.getElementById("us"), ctx=cv.getContext("2d");
+const off=document.createElement("canvas"); off.width=RW; const octx=off.getContext("2d");
+let img=null;
+function render(){
+  const rows=S.depth*PX_MM;
+  if(off.height!==rows){ off.height=rows; img=octx.createImageData(RW,rows); }
+  const G=geom(), P=PRESETS[S.preset], onsd=onsdTrue(S.eye,S.plane), ode=odeTrue(), lp=lensParams();
+  const now=performance.now();
+  let mv=0; if(S.moveT>=0){ const t=(now-S.moveT)/1000; mv = t<6 ? Math.sin(t*5)*Math.exp(-t/2.2)+0.0 : 0; if(t>=6)S.moveT=-1; }
+  stampMembranes(G,rows,mv);
+  const wB=0.5+0.5*Math.sin(now/240), gainF=Math.pow(10,(S.gain-50)/80)*P.out*1.1;
+  const phase=now/1000*2*Math.PI*1.2;
+  const colorOn=S.color;
+  // lens edge shadow positions (world)
+  const e1=toWorld(G,lp.x-lp.rx,lp.z), e2=toWorld(G,lp.x+lp.rx,lp.z);
+  const data=img.data;
+  for(let yy=0;yy<rows;yy++){
+    const sDepth=(yy+0.5)/PX_MM, att=Math.exp(-0.010*sDepth), zc0=sDepth*G.cD, y=sDepth*G.sD;
+    for(let xx=0;xx<RW;xx++){
+      const xi=(xx+0.5)/PX_MM-W_MM/2; const i=yy*RW+xx;
+      const x=xi*G.cR-zc0*G.sR, z=xi*G.sR+zc0*G.cR;   // rotate with the probe about the skin contact point
+      let v, col=0, inside=false, wallW=0;
+      if(sDepth<0.3||z<0.25) v=0.015;         // gel (and lifted probe edge when rocked)
+      else if(sDepth<0.45) v=0.4;             // transparent dressing
+      else {
+        let dz=z-ZC; if(dz<0) dz*=G.comp; const rr=Math.hypot(x,y); const r=Math.sqrt(rr*rr+dz*dz);
+        const rc=Math.hypot(rr,dz-CORNEA_C);
+        if(dz<-2.5){
+          // ---- anterior segment as smooth, blended layers (no hard edges) ----
+          const gt=globeTop(rr), top= gt<0 ? -1 : ZC+(gt-ZC)/G.comp;
+          const tissue=0.09*TEX[i];
+          const wC=1-ss(5.0,6.6,rr);                                   // cornea weight
+          const inSph=1-ss(R-0.25,R+0.15,r);
+          const inCor=wC*(1-ss(CORNEA_R-0.75,CORNEA_R-0.45,rc));
+          const mIn=Math.max(inSph,inCor);
+          let b=tissue;
+          if(mIn>0.002){ const xe=x*G.cE+dz*G.sE, ze=-x*G.sE+dz*G.cE; b=mix(tissue,interior(G,xe,ze,y,lp,ode),mIn); inside=mIn>0.5; }
+          // faint anterior sclera
+          b=Math.max(b,(0.1+0.08*Math.pow(Math.abs(dz/r),3))*Math.exp(-Math.pow((r-R-0.45)/0.5,2))*(1-wC));
+          // cornea: two thin echogenic surfaces with a dimmer stroma between
+          const cv=wC*(0.5*Math.exp(-Math.pow((rc-(CORNEA_R-0.08))/0.1,2))+0.4*Math.exp(-Math.pow((rc-(CORNEA_R-0.48))/0.1,2))+0.1*ss(CORNEA_R-0.62,CORNEA_R-0.5,rc)*(1-ss(CORNEA_R-0.05,CORNEA_R+0.05,rc)));
+          b=Math.max(b,cv);
+          v=b;
+          if(top>0){
+            // eyelid: layered echogenic band draped over the globe, blended smoothly into the surface below
+            const depthIn=top-z;
+            const lidFade=1-ss(ZC-9,ZC-4.5,top);
+            const wb=ss(-0.05,0.25,depthIn)*(1-ss(2.2,2.9,depthIn));
+            const layer=0.5+0.5*Math.sin(depthIn*5.0+0.7*Math.sin(x*0.45)+1.5*(TEX[i]-1));
+            let lid=mix(tissue,(0.18+0.4*layer*layer)*TEX[i],wb*lidFade);
+            lid=Math.max(lid,0.5*lidFade*Math.exp(-Math.pow((depthIn-0.1)/0.13,2)));
+            v=mix(b,lid,ss(-0.12,0.12,depthIn));
+          }
+        } else if(r>R+WALL){
+          if(dz<-3) v=0.09*TEX[i];
+          else { const xe=x*G.cE+dz*G.sE, ze=-x*G.sE+dz*G.cE; const o=retro(G,xe,ze,y,onsd,colorOn,phase); v=mix(0.09*TEX[i],o[0]*TEX[i],ss(-3,1,dz)); col=o[1];
+            const t=1-ss(R+WALL,R+WALL+0.5,r); if(t>0 && dz>0){ v=mix(v,wallVal(dz,R+WALL-0.01),t); wallW=t; } }
+        } else if(r>R){
+          // globe wall: posterior wall (retina, choroid, sclera) is bright; lateral walls fade (angle dependence)
+          v=wallVal(dz,r); wallW=1;
+        } else {
+          const xe=x*G.cE+dz*G.sE, ze=-x*G.sE+dz*G.cE; v=interior(G,xe,ze,y,lp,ode); inside=true;
+          const t=ss(R-0.45,R,r); if(t>0){ v=mix(v,wallVal(dz,R+0.01),t); wallW=t; }
+        }
+      }
+      if(inside && MEM[i]>v) v=MEM[i];
+      // lens edge shadows
+      const shEnd=(ZC+R+3)/G.cD;
+      if(sDepth>e1.z+1 && sDepth<shEnd && Math.abs(xi-e1.x)<0.4) v*=0.8;
+      if(sDepth>e2.z+1 && sDepth<shEnd && Math.abs(xi-e2.x)<0.4) v*=0.8;
+      // air under dressing
+      if(S.air && xi<-3.5){ if(sDepth<6){ const ph=(sDepth%1.15); if(ph<0.22) v=Math.max(v,0.65*Math.exp(-sDepth/3)); else v*=0.1; } else v*=0.08; }
+      let sp = S.frozen ? SPA[i] : SPA[i]*(1-wB)+SPB[i]*wB; if(wallW>0) sp=mix(sp,1,0.65*wallW);
+      let g=v*sp*gainF*att; g=Math.log(1+7*g)/Math.log(8); g=Math.max(0,Math.min(1,g));
+      const o=i*4;
+      if(col>0){ data[o]=255*Math.min(1,0.45+col*0.6); data[o+1]=40; data[o+2]=30; }
+      else if(col<0){ data[o]=30; data[o+1]=70; data[o+2]=255*Math.min(1,0.4-col*0.7); }
+      else { const c=g*255; data[o]=c; data[o+1]=c; data[o+2]=c*1.02; }
+      data[o+3]=255;
+    }
+  }
+  octx.putImageData(img,0,0);
+  drawScreen(G,onsd,ode);
+}
+function cssSize(){ const w=cv.parentElement.clientWidth; return {w, h:w*S.depth/W_MM}; }
+function drawScreen(G,onsd,ode){
+  const dpr=window.devicePixelRatio||1, cs=cssSize();
+  const W=Math.round(cs.w*dpr), H=Math.round(cs.h*dpr);
+  if(cv.width!==W||cv.height!==H){ cv.width=W; cv.height=H; cv.style.height=cs.h+"px"; }
+  ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality="high";
+  ctx.drawImage(off,0,0,W,H);
+  const k=W/W_MM; const X=x=>(x+W_MM/2)*k, Z=z=>z*k;
+  ctx.save(); ctx.font=`${11*dpr}px system-ui,sans-serif`; ctx.textBaseline="top";
+  // depth ruler
+  ctx.strokeStyle="rgba(255,255,255,.7)"; ctx.fillStyle="rgba(255,255,255,.8)"; ctx.lineWidth=dpr;
+  for(let z=0;z<=S.depth;z+=5){ const y=Z(z); ctx.beginPath(); ctx.moveTo(W-(z%10===0?12:7)*dpr,y); ctx.lineTo(W,y); ctx.stroke(); if(z%10===0&&z>0) ctx.fillText((z/10).toFixed(0),W-26*dpr,y-6*dpr); }
+  // orientation marker and header
+  ctx.fillStyle="#4fb3d9"; ctx.beginPath(); ctx.arc(10*dpr,10*dpr,4*dpr,0,7); ctx.fill();
+  ctx.fillStyle="rgba(255,255,255,.85)";
+  const P=PRESETS[S.preset]; const ti=S.color?P.tiC:P.ti;
+  ctx.fillText(`${S.eye==="R"?"Right":"Left"} eye, ${S.plane==="T"?"transverse":"sagittal"}  L12-4`,20*dpr,5*dpr);
+  ctx.textAlign="right";
+  const unsafe = P.mi>=0.23 || ti>1.0;
+  ctx.fillStyle= unsafe?"#ff6b6b":"rgba(255,255,255,.85)";
+  ctx.fillText(`MI ${P.mi.toFixed(2)}  TI ${ti.toFixed(1)}`,W-32*dpr,5*dpr);
+  ctx.textAlign="left";
+  if(S.frozen){ ctx.fillStyle="#f2b84b"; ctx.fillText("FROZEN",10*dpr,H-18*dpr); }
+  if(S.press>35){ ctx.fillStyle="#ff6b6b"; ctx.fillText("Excess pressure on globe",10*dpr,22*dpr); }
+  // color box
+  if(S.color){ const a=toWorld(G,-4,R+0.5), b=toWorld(G,4,R+0.5), c2=toWorld(G,4,R+11), d=toWorld(G,-4,R+11);
+    ctx.strokeStyle="rgba(255,255,255,.55)"; ctx.setLineDash([4*dpr,3*dpr]); ctx.beginPath(); ctx.moveTo(X(a.x),Z(a.z)); ctx.lineTo(X(b.x),Z(b.z)); ctx.lineTo(X(c2.x),Z(c2.z)); ctx.lineTo(X(d.x),Z(d.z)); ctx.closePath(); ctx.stroke(); ctx.setLineDash([]); }
+  // labels
+  if(S.labels){
+    const lp=lensParams();
+    const pts=[
+      ["Eyelid", w2i(G,3.5,globeTop(3.5)-1.3)],
+      ["Cornea", toWorld(G,1.0,CORNEA_C-CORNEA_R+0.25)],
+      ["Anterior chamber", toWorld(G,0.6,-12.0)],
+      ["Iris", toWorld(G,4.2,IRIS_Z)],
+      ["Lens", toWorld(G,lp.x+1.0,lp.z-lp.rz+0.05)],
+      ["Vitreous body", toWorld(G,3.0,0)],
+      ["Retina", toWorld(G,4.0,Math.sqrt(R*R-16)+0.3)],
+      ["Optic nerve sheath", toWorld(G,0.6,R+6)],
+      ["Retrobulbar fat", toWorld(G,5.5,R+9)]
+    ];
+    const fs=Math.max(13,Math.min(16,W/dpr/30));
+    ctx.font=`600 ${fs*dpr}px system-ui,sans-serif`; ctx.textBaseline="middle"; ctx.textAlign="right";
+    const tx=W-30*dpr; let lastY=-1e9;
+    for(const [t,p] of pts){
+      let ty=Math.max(Z(p.z), lastY+(fs+7)*dpr); lastY=ty;
+      const tw=ctx.measureText(t).width;
+      ctx.fillStyle="rgba(10,16,24,.72)"; ctx.beginPath(); if(ctx.roundRect) ctx.roundRect(tx-tw-7*dpr,ty-(fs/2+4)*dpr,tw+14*dpr,(fs+8)*dpr,5*dpr); else ctx.rect(tx-tw-7*dpr,ty-(fs/2+4)*dpr,tw+14*dpr,(fs+8)*dpr); ctx.fill();
+      ctx.strokeStyle="rgba(255,255,255,.9)"; ctx.lineWidth=1.3*dpr; ctx.beginPath(); ctx.moveTo(X(p.x),Z(p.z)); ctx.lineTo(tx-tw-8*dpr,ty); ctx.stroke();
+      ctx.fillStyle="#ffffff"; ctx.beginPath(); ctx.arc(X(p.x),Z(p.z),2*dpr,0,7); ctx.fill();
+      ctx.fillText(t,tx,ty);
+    }
+    ctx.textAlign="left"; ctx.textBaseline="top"; ctx.font=`${11*dpr}px system-ui,sans-serif`;
+  }
+  // guide
+  if(S.guide && S.mode==="lab"){
+    const P0=G.P, M={x:P0.x+3*G.u.x,z:P0.z+3*G.u.z}, h=onsd/2;
+    ctx.strokeStyle="rgba(242,184,75,.95)"; ctx.setLineDash([5*dpr,4*dpr]); ctx.lineWidth=1.3*dpr;
+    ctx.beginPath(); ctx.moveTo(X(P0.x),Z(P0.z)); ctx.lineTo(X(M.x),Z(M.z)); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(X(M.x-h*G.v.x),Z(M.z-h*G.v.z)); ctx.lineTo(X(M.x+h*G.v.x),Z(M.z+h*G.v.z)); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle="#f2b84b"; ctx.fillText(`guide: ${onsd.toFixed(2)} mm`,X(M.x+h*G.v.x)+6*dpr,Z(M.z)-6*dpr);
+  }
+  // calipers
+  ctx.lineWidth=1.5*dpr;
+  const drawCal=(a,b,n,live)=>{
+    ctx.strokeStyle=live?"rgba(255,235,59,.7)":"#ffeb3b"; ctx.fillStyle="#ffeb3b";
+    ctx.beginPath(); ctx.moveTo(X(a.x),Z(a.z)); ctx.lineTo(X(b.x),Z(b.z)); ctx.stroke();
+    for(const p of [a,b]){ const px=X(p.x),pz=Z(p.z),s=5*dpr; ctx.beginPath(); ctx.moveTo(px-s,pz); ctx.lineTo(px+s,pz); ctx.moveTo(px,pz-s); ctx.lineTo(px,pz+s); ctx.stroke(); }
+    const len=Math.hypot(b.x-a.x,b.z-a.z);
+    ctx.fillText(`${n}: ${len.toFixed(2)} mm`,X((a.x+b.x)/2)+8*dpr,Z((a.z+b.z)/2)+4*dpr);
+  };
+  S.cals.forEach((c,i)=>drawCal(c.a,c.b,i+1,false));
+  if(S.pending && S.hover) drawCal(S.pending,S.hover,S.cals.length+1,true);
+  ctx.restore();
+  updateReadouts(G,onsd,ode);
+}
+
+// ---------- readouts ----------
+function updateReadouts(G,onsd,ode){
+  const P=PRESETS[S.preset]; const ti=S.color?P.tiC:P.ti; const ok=P.mi<0.23 && ti<=1.0;
+  document.getElementById("safetyTxt").innerHTML=`MI ${P.mi.toFixed(2)}, TI ${ti.toFixed(1)} <span class="pill ${ok?"good":"bad"}">${ok?"Within ocular limits":"Exceeds ocular limits"}</span>`;
+  document.getElementById("safetyMsg").innerHTML= ok ? `<span class="muted">Ocular limits: MI below 0.23, TI at or below 1.0.</span>` : `<span class="no">The eye is thermally sensitive. Use the ophthalmic preset or reduce output to minimum${S.color?", and limit Doppler time":""}.</span>`;
+  const ang=psiDeg();
+  const a=Math.abs(ang);
+  const fd=G.fanDeg, fa=Math.abs(fd), app=apparentONSD(G,onsd);
+  document.getElementById("alignTxt").innerHTML = `<b>Rock</b> (in plane): nerve ${ang.toFixed(0)}&deg; to the beam. ` +
+    (a<=4?`<span class="ok">Sheath parallel to the beam; walls are crisp.</span>`: a<=9?`<span class="mid">Close. Rock a little more ${ang>0?"(increase rock)":"(decrease rock)"} or adjust gaze.</span>`:`<span class="no">Oblique nerve: blurred walls, risk of edge artifact. Rock the probe or change gaze.</span>`) +
+    `<br><b>Fan</b> (out of plane): ` + (fa<=1.5?`<span class="ok">Plane cuts through the center of the nerve: widest sheath.</span>`: app>0?`<span class="mid">Plane is off the nerve's center, so the sheath looks narrower than it is. Fan slowly until it is widest.</span>`:`<span class="no">Fanned off the nerve: it has left the scan plane. Fan back.</span>`) +
+    (S.press>35?`<br><span class="no">Too much pressure: lighten up and brace your hand.</span>`:"");
+  drawProbeFig(ang);
+  if(S.truth && S.mode==="lab"){
+    const tb=document.getElementById("truthBox"); tb.classList.remove("hidden");
+    const T=(e,p)=>onsdTrue(e,p).toFixed(2);
+    tb.innerHTML=`Fan offset ${G.fanDeg.toFixed(1)}&deg;: apparent sheath width ${apparentONSD(G,onsd).toFixed(2)} mm<br>Effective ICP ${icpEff().toFixed(1)} mmHg &middot; ONSD (this eye/plane) <b>${onsd.toFixed(2)} mm</b> ${band(onsd)}<br>R: T ${T("R","T")}, S ${T("R","S")} &middot; L: T ${T("L","T")}, S ${T("L","S")}<br>Optic disc elevation ${ode.toFixed(2)} mm${ode>=1?" (&ge; 1 mm)":ode>0.6?" (&gt; 0.6 mm)":""}`;
+  } else document.getElementById("truthBox").classList.add("hidden");
+}
+function band(v){ return v<5?`<span class="pill good">&lt; 5: likely normal</span>`: v<=6?`<span class="pill warn">5 to 6: indeterminate</span>`:`<span class="pill bad">&gt; 6: suggests raised ICP</span>`; }
+function drawProbeFig(ang){
+  const svg=document.getElementById("probeFig");
+  const key=S.eye+S.plane;
+  let g=0; if(S.plane==="T"){ if(S.gaze==="L")g=-10; if(S.gaze==="R")g=10; } else { if(S.gaze==="U")g=-10; if(S.gaze==="D")g=10; }
+  const r=28, cy=138;
+  const cable=(dx)=>`<path d="M0 -66 C0 -76 ${dx*0.5} -80 ${dx} -84" stroke="#2a323b" stroke-width="4.5" fill="none" stroke-linecap="round"/>`;
+  const relief=`<g fill="#323c47"><rect x="-4.6" y="-66" width="9.2" height="3" rx="1"/><rect x="-4.2" y="-62.5" width="8.4" height="3" rx="1"/><rect x="-3.8" y="-59" width="7.6" height="3" rx="1"/></g>`;
+  const probeFront=cable(26)+relief+`
+    <path d="M-25 -4 L-25 -10 Q-25 -17 -18.5 -21 L-11.5 -27 Q-9.5 -29 -9.5 -33 L-9.5 -51 Q-9.5 -56.5 -4 -57 L4 -57 Q9.5 -56.5 9.5 -51 L9.5 -33 Q9.5 -29 11.5 -27 L18.5 -21 Q25 -17 25 -10 L25 -4 Z" fill="url(#pbody)" stroke="#7f8b98" stroke-width="1.1"/>
+    <path d="M-21 -9 Q-21 -15 -15.5 -19 L-9 -24" stroke="#ffffff" stroke-width="1.6" fill="none" opacity=".55" stroke-linecap="round"/>
+    <rect x="-6.8" y="-50" width="13.6" height="15" rx="4" fill="url(#pgrip)"/>
+    <path d="M-4.5 -46.5 H4.5 M-4.5 -43 H4.5 M-4.5 -39.5 H4.5" stroke="#5a6877" stroke-width="1"/>
+    <path d="M-24.6 -4 L24.6 -4 L24 -1 Q0 2.4 -24 -1 Z" fill="#1d2833"/>
+    <path d="M-23 -2.6 Q0 0.4 23 -2.6" stroke="#4fb3d9" stroke-width=".8" fill="none" opacity=".7"/>
+    <path d="M-25 -16 L-27.6 -16 Q-28.4 -13.5 -27.6 -11 L-25 -11 Z" fill="#f2b84b"/>`;
+  const probeSide=cable(14)+relief+`
+    <path d="M-8.5 -4 L-9 -16 Q-9 -22 -6.5 -27 L-6.5 -51 Q-6.5 -56.5 -3 -57 L3 -57 Q6.5 -56.5 6.5 -51 L6.5 -27 Q9 -22 9 -16 L8.5 -4 Z" fill="url(#pbody)" stroke="#7f8b98" stroke-width="1.1"/>
+    <path d="M-6 -10 Q-6.5 -20 -4.5 -26" stroke="#ffffff" stroke-width="1.4" fill="none" opacity=".55" stroke-linecap="round"/>
+    <rect x="-5" y="-50" width="10" height="15" rx="3.5" fill="url(#pgrip)"/>
+    <path d="M-3.2 -46.5 H3.2 M-3.2 -43 H3.2 M-3.2 -39.5 H3.2" stroke="#5a6877" stroke-width="1"/>
+    <path d="M-8.6 -4 L8.6 -4 L8.2 -1 Q0 1.6 -8.2 -1 Z" fill="#1d2833"/>`;
+  const panel=(cx,nerveDeg,tiltDeg,front,title,sub)=>{
+    const na=nerveDeg*Math.PI/180;
+    const px=cx-r*Math.sin(na), py=cy+r*Math.cos(na), nx=cx-(r+30)*Math.sin(na), ny=cy+(r+30)*Math.cos(na);
+    const face=cy-r-4;
+    return `<rect x="${cx-72}" y="2" width="144" height="201" rx="10" fill="#0f1520"/>
+     <text x="${cx}" y="16" fill="#e6edf3" font-size="11" font-weight="700" text-anchor="middle">${title}</text>
+     <text x="${cx}" y="28" fill="#9aa7b4" font-size="8.5" text-anchor="middle">${sub}</text>
+     <path d="M${cx-40} ${face+2} Q${cx} ${face-6} ${cx+40} ${face+2}" stroke="#d9a38a" stroke-width="4" fill="none" opacity=".8"/>
+     <circle cx="${cx}" cy="${cy}" r="${r}" fill="#05080c" stroke="#c9d3dd" stroke-width="1.8"/>
+     <ellipse cx="${cx}" cy="${cy-r+8}" rx="10" ry="4" fill="none" stroke="#9aa7b4"/>
+     <line x1="${px}" y1="${py}" x2="${nx}" y2="${ny}" stroke="#7ee0a1" stroke-width="6" stroke-linecap="round" opacity=".9"/>
+     <g transform="translate(${cx} ${face}) rotate(${tiltDeg})">
+       <line x1="0" y1="0" x2="0" y2="${2*r+38}" stroke="#4fb3d9" stroke-width="1.4" stroke-dasharray="4 3"/>
+       <g transform="scale(1.05)">${front?probeFront:probeSide}</g>
+     </g>`;
+  };
+  svg.setAttribute("viewBox","0 0 300 205");
+  svg.innerHTML = `<defs><linearGradient id="pbody" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#cfd6de"/><stop offset=".45" stop-color="#f4f6f8"/><stop offset="1" stop-color="#b9c2cc"/></linearGradient><linearGradient id="pgrip" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#2c3640"/><stop offset=".5" stop-color="#46525f"/><stop offset="1" stop-color="#2a333d"/></linearGradient></defs>` +
+    panel(75, S.theta0[key]+g, S.rock, true, "ROCK (in plane)", "tilt along the long axis") +
+    panel(225, S.fan0, S.fan, false, "FAN (out of plane)", "sweep across the short axis");
+}
+
+// ---------- calipers & checking ----------
+function evtMM(e){ const rect=cv.getBoundingClientRect(); const x=(e.clientX-rect.left)/rect.width*W_MM-W_MM/2; const z=(e.clientY-rect.top)/rect.height*S.depth; return {x,z}; }
+cv.addEventListener("pointerdown",e=>{
+  if(!S.calMode) return; if(!S.frozen){ setFb(`<span class="mid">Freeze the image first, then place calipers.</span>`); return; }
+  const p=evtMM(e);
+  if(!S.pending){ S.pending=p; S.hover=p; }
+  else { if(S.cals.length>=6) S.cals.shift(); S.cals.push({a:S.pending,b:p}); S.pending=null; S.hover=null; }
+  redrawFrozen();
+});
+cv.addEventListener("pointermove",e=>{ if(S.pending){ S.hover=evtMM(e); redrawFrozen(); } });
+function redrawFrozen(){ const G=geom(); drawScreen(G,onsdTrue(S.eye,S.plane),odeTrue()); }
+function setFb(h){ document.getElementById("feedback").innerHTML=h; document.getElementById("feedback").classList.remove("muted"); }
+function classify(G){
+  let depthC=null, diamC=null, odeC=null;
+  for(const c of S.cals){
+    const dx=c.b.x-c.a.x, dz=c.b.z-c.a.z, L=Math.hypot(dx,dz); if(L<0.2) continue;
+    const du=Math.abs((dx*G.u.x+dz*G.u.z)/L), dv=Math.abs((dx*G.v.x+dz*G.v.z)/L);
+    if(du>Math.cos(20*Math.PI/180)){
+      // which end is near P?
+      const da=Math.hypot(c.a.x-G.P.x,c.a.z-G.P.z), db=Math.hypot(c.b.x-G.P.x,c.b.z-G.P.z);
+      const near= da<db?c.a:c.b, far= da<db?c.b:c.a;
+      const along=(far.x-near.x)*G.u.x+(far.z-near.z)*G.u.z;
+      if(along<0 && L<2.5) odeC={c,near,far,L}; else depthC={c,near,far,L};
+    } else if(dv>Math.cos(20*Math.PI/180)) diamC={c,L};
+  }
+  return {depthC,diamC,odeC};
+}
+function evaluate(){
+  const G=geom(), onsd=onsdTrue(S.eye,S.plane), ode=odeTrue();
+  if(!S.cals.length){ setFb(`<span class="mid">No calipers yet. Freeze, choose Calipers, and click twice per caliper.</span>`); return null; }
+  const {depthC,diamC,odeC}=classify(G); const out=[]; let measured=null, quality=0;
+  const ang=Math.abs(psiDeg());
+  out.push(ang<=4?`<div class="ok">Alignment: nerve parallel to beam (${ang.toFixed(0)}&deg;).</div>`:ang<=9?`<div class="mid">Alignment: ${ang.toFixed(0)}&deg; off axis. Acceptable, but walls are softer; rock a bit more.</div>`:`<div class="no">Alignment: ${ang.toFixed(0)}&deg; off axis. Oblique nerve gives unreliable diameters. Re-align before measuring.</div>`);
+  const fa=Math.abs(G.fanDeg), app=apparentONSD(G,onsd);
+  out.push(fa<=1.5?`<div class="ok">Fan: scan plane through the center of the nerve.</div>`:`<div class="${app>0?"mid":"no"}">Fan: ${fa.toFixed(1)}&deg; off the nerve's center, so the sheath shows ${app>0?"only "+app.toFixed(2)+" mm wide here":"nothing"}. Fan slowly until the sheath is widest, then measure.</div>`);
+  if(depthC){
+    const startErr=Math.hypot(depthC.near.x-G.P.x,depthC.near.z-G.P.z);
+    const okS=startErr<=0.8, okL=depthC.L>=2.5&&depthC.L<=3.5;
+    out.push(`<div class="${okS&&okL?"ok":"mid"}">Depth caliper: ${depthC.L.toFixed(2)} mm ${okL?"(good, target 3 mm)":"(target 3 mm)"}; ${okS?"starts at the posterior globe over the nerve.":"should start at the posterior globe where the nerve enters ("+startErr.toFixed(1)+" mm away)."}</div>`);
+  } else out.push(`<div class="mid">No depth caliper found. Place one running 3 mm straight back along the nerve from the posterior globe.</div>`);
+  if(diamC){
+    const c=diamC.c, m={x:(c.a.x+c.b.x)/2,z:(c.a.z+c.b.z)/2};
+    const along=(m.x-G.P.x)*G.u.x+(m.z-G.P.z)*G.u.z, perp=(m.x-G.P.x)*G.v.x+(m.z-G.P.z)*G.v.z;
+    const err=diamC.L-onsd; measured=diamC.L;
+    const depthOk=Math.abs(along-3)<=0.8, centered=Math.abs(perp)<=0.8;
+    out.push(`<div class="${depthOk?"ok":"mid"}">Diameter caliper depth: ${along.toFixed(1)} mm behind the globe ${depthOk?"(on target)":"(should be 3 mm, where the sheath is widest)"}.</div>`);
+    if(!centered) out.push(`<div class="no">Diameter caliper is not centered on the nerve. Did you measure a lens edge shadow?</div>`);
+    const aerr=Math.abs(err);
+    out.push(`<div class="${aerr<=0.3?"ok":aerr<=0.6?"mid":"no"}">Your ONSD ${diamC.L.toFixed(2)} mm vs reference ${onsd.toFixed(2)} mm (${err>=0?"+":""}${err.toFixed(2)}). ${aerr<=0.3?"Outer wall to outer wall: well done.":err<0?"Too small: measure to the outer edge of each bright sheath wall.":"Too large: you may have included retrobulbar fat."}</div>`);
+    quality = (aerr<=0.3?2:aerr<=0.6?1:0) + (depthOk?1:0) + (ang<=4&&fa<=1.5?1:0);
+  } else out.push(`<div class="mid">No diameter caliper found. Place one perpendicular to the nerve, outer wall to outer wall.</div>`);
+  if(odeC){ const err=odeC.L-ode; out.push(`<div class="${Math.abs(err)<=0.3?"ok":"mid"}">Disc elevation caliper: ${odeC.L.toFixed(2)} mm vs reference ${ode.toFixed(2)} mm.</div>`); }
+  const P=PRESETS[S.preset], ti=S.color?P.tiC:P.ti;
+  if(P.mi>=0.23||ti>1) out.push(`<div class="no">Safety: output exceeds ocular limits (MI ${P.mi}, TI ${ti}).</div>`);
+  if(S.press>35) out.push(`<div class="no">Safety: excess pressure on the globe distorts the measurement.</div>`);
+  setFb(out.join(""));
+  return {measured,quality};
+}
+function saveMeasurement(){
+  const r=evaluate(); if(!r||r.measured==null){ return; }
+  S.log.push({eye:S.eye,plane:S.plane,val:r.measured,q:r.quality});
+  renderLog();
+}
+function renderLog(){
+  const box=document.getElementById("logBox");
+  if(!S.log.length){ box.innerHTML="No measurements saved yet."; box.classList.add("muted"); return; }
+  box.classList.remove("muted");
+  let h=`<table class="log"><tr><th>#</th><th>Eye</th><th>Plane</th><th>ONSD</th><th>Quality</th></tr>`;
+  S.log.forEach((m,i)=>{ h+=`<tr><td>${i+1}</td><td>${m.eye}</td><td>${m.plane==="T"?"Transverse":"Sagittal"}</td><td>${m.val.toFixed(2)} mm</td><td>${"&#9733;".repeat(m.q)}${"&#9734;".repeat(4-m.q)}</td></tr>`; });
+  h+=`</table>`;
+  for(const eye of ["R","L"]){
+    const ms=S.log.filter(m=>m.eye===eye); if(!ms.length) continue;
+    const mean=a=>a.reduce((s,m)=>s+m.val,0)/a.length;
+    const best=[...ms].sort((a,b)=>b.q-a.q).slice(0,3);
+    const t=ms.filter(m=>m.plane==="T"), s=ms.filter(m=>m.plane==="S");
+    const planeAvg = t.length&&s.length ? (mean(t)+mean(s))/2 : null;
+    const final = planeAvg ?? mean(best);
+    h+=`<div style="margin-top:6px"><b>${eye==="R"?"Right":"Left"} eye:</b> best-3 average ${mean(best).toFixed(2)} mm` + (planeAvg?`; two-plane average ${planeAvg.toFixed(2)} mm`:` <span class="muted">(add a ${t.length?"sagittal":"transverse"} measurement for a two-plane average)</span>`) + ` ${band(final)}</div>`;
+  }
+  box.innerHTML=h;
+}
+function logMeanAll(){ if(!S.log.length) return null; const byEye={}; for(const m of S.log){(byEye[m.eye]=byEye[m.eye]||[]).push(m.val);} const means=Object.values(byEye).map(a=>a.reduce((s,v)=>s+v,0)/a.length); return Math.max(...means); }
+
+// ---------- controls wiring ----------
+const $=id=>document.getElementById(id);
+function bindRange(id,key,fmt){ const el=$(id), out=$(id+"V"); const f=()=>{ S[key]=parseFloat(el.value); if(out) out.textContent=fmt(S[key]); if(S.frozen) redrawFrozen(); }; el.addEventListener("input",f); f(); }
+bindRange("icp","icp",v=>v+" mmHg"); bindRange("paco2","paco2",v=>v+" mmHg"); bindRange("hours","hours",v=>v+" h");
+bindRange("base","base",v=>v.toFixed(2)+" mm"); bindRange("rock","rock",v=>(v>0?"+":"")+v+"°"); bindRange("fan","fan",v=>(v>0?"+":"")+v.toFixed(1)+"°"); bindRange("press","press",v=>v<=35?v+" (light)":v+" (heavy)"); bindRange("gain","gain",v=>v+"%");
+function bindSeg(id,key,cb){ const seg=$(id); seg.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{ seg.querySelectorAll("button").forEach(x=>x.classList.remove("on")); b.classList.add("on"); S[key]= key==="depth"?parseInt(b.dataset.v):b.dataset.v; if(cb)cb(); if(S.frozen){ unfreeze(); } })); }
+function setSeg(id,v){ $(id).querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.v===String(v))); }
+bindSeg("eyeSeg","eye",()=>S.cals=[]); bindSeg("planeSeg","plane",()=>S.cals=[]); bindSeg("gazeSeg","gaze"); bindSeg("depthSeg","depth",()=>S.cals=[]);
+$("pathSel").addEventListener("change",e=>{S.path=e.target.value; if(S.frozen)redrawFrozen();});
+$("presetSel").addEventListener("change",e=>{S.preset=e.target.value; if(S.frozen)redrawFrozen();});
+$("airChk").addEventListener("change",e=>{S.air=e.target.checked; if(S.frozen)redrawFrozen();});
+$("colorChk").addEventListener("change",e=>{S.color=e.target.checked; if(S.frozen)redrawFrozen();});
+$("labelChk").addEventListener("change",e=>{S.labels=e.target.checked; if(S.frozen)redrawFrozen();});
+$("guideChk").addEventListener("change",e=>{S.guide=e.target.checked; if(S.frozen)redrawFrozen();});
+$("truthChk").addEventListener("change",e=>{S.truth=e.target.checked; if(S.frozen)redrawFrozen();});
+function unfreeze(){ S.frozen=false; S.pending=null; $("freezeBtn").classList.remove("on"); $("freezeBtn").innerHTML="Freeze <kbd>F</kbd>"; }
+function toggleFreeze(){ if(!S.placed) return; snapAnim(); S.frozen=!S.frozen; $("freezeBtn").classList.toggle("on",S.frozen); $("freezeBtn").innerHTML=S.frozen?"Unfreeze <kbd>F</kbd>":"Freeze <kbd>F</kbd>"; if(S.frozen){ S.calMode=true; $("calBtn").classList.add("on"); render(); } else { S.pending=null; } }
+$("freezeBtn").addEventListener("click",toggleFreeze);
+document.addEventListener("keydown",e=>{ if((e.key==="f"||e.key==="F") && !/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) toggleFreeze(); });
+$("calBtn").addEventListener("click",()=>{ S.calMode=!S.calMode; $("calBtn").classList.toggle("on",S.calMode); if(S.calMode&&!S.frozen) setFb(`<span class="mid">Calipers are on. Freeze the image to place them.</span>`); });
+$("undoBtn").addEventListener("click",()=>{ if(S.pending){S.pending=null;} else S.cals.pop(); if(S.frozen)redrawFrozen(); });
+$("clearBtn").addEventListener("click",()=>{ S.cals=[]; S.pending=null; if(S.frozen)redrawFrozen(); });
+$("checkBtn").addEventListener("click",evaluate);
+$("saveBtn").addEventListener("click",saveMeasurement);
+$("moveBtn").addEventListener("click",()=>{ if(S.frozen) unfreeze(); S.moveT=performance.now(); });
+
+// ---------- tabs ----------
+document.querySelectorAll("nav.tabs button").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll("nav.tabs button").forEach(x=>x.classList.remove("on")); b.classList.add("on");
+  const t=b.dataset.tab;
+  $("learnView").classList.toggle("hidden",t!=="learn"); $("anatomyView").classList.toggle("hidden",t!=="anatomy");
+  $("scanView").classList.toggle("hidden",t==="learn"||t==="anatomy");
+  if(t==="cases" && S.mode!=="cases") startCases();
+  if(t==="lab" && S.mode!=="lab") startLab();
+}));
+function startLab(){
+  S.mode="lab"; S.placed=true; $("noProbe").classList.add("hidden");
+  $("labPatient").classList.remove("hidden"); $("caseCard").classList.add("hidden"); $("guideRow").classList.remove("hidden");
+  S.theta0={RT:8,LT:-8,RS:5,LS:5}; S.fan0=1.5;
+  ["icp","paco2","hours","base"].forEach(id=>{ S[id]=parseFloat($(id).value); });
+  S.path=$("pathSel").value; S.cals=[]; S.log=[]; renderLog(); unfreeze(); snapAnim();
+}
+
+// ---------- cases ----------
+const ONSD_OPTS=["Less than 5 mm: likely normal ICP","5 to 6 mm: indeterminate, assess for optic disc elevation","Greater than 6 mm: suggests elevated ICP"];
+const DX_OPTS=["Retinal detachment","Posterior vitreous detachment","Vitreous hemorrhage","Posterior lens dislocation","Central retinal artery occlusion","Normal ocular ultrasound"];
+const CASES=[
+ {title:"Ground-level fall on anticoagulation",
+  v:"A 72-year-old on apixaban fell and struck his head. GCS 15, then 14. CT is pending while the scanner is down. You screen for raised ICP at the bedside.",
+  p:{path:"normal",icp:9,paco2:40,hours:0,base:4.5}, measure:true,
+  qs:[{q:"Based on your averaged ONSD, how do you classify it?",o:ONSD_OPTS,a:0,e:"The reference ONSD is about 4.6 mm. Under 5 mm makes raised ICP less likely, but a single normal value does not guarantee normal ICP: keep doing neuro checks and get the CT."}]},
+ {title:"Severe TBI before ICP monitoring",
+  v:"A 34-year-old motorcyclist, intubated, GCS 6 on arrival, with diffuse injury on CT. Neurosurgery is 40 minutes away and no ICP monitor is in place yet. PaCO2 is 46.",
+  p:{path:"normal",icp:30,paco2:46,hours:1,base:4.6}, measure:true,
+  qs:[{q:"How do you classify the ONSD?",o:ONSD_OPTS,a:2,e:"The reference ONSD is above 6 mm. ONSD rises within minutes of an ICP rise, while disc elevation lags hours to days, which is why there is no papilledema yet. Note that hypercapnia adds to the ICP."},
+      {q:"Best next step?",o:["Wait 24 hours and look for papilledema before acting","Treat as probable intracranial hypertension (correct the hypercapnia, temporize) and expedite neurosurgical evaluation for invasive ICP monitoring","Use serial ONSD alone to titrate hyperosmolar therapy instead of invasive monitoring","Reassure: ONSD is not used in TBI"],a:1,e:"ONSD is a screening and triage tool. Strategies based only on noninvasive ICP estimates are not recommended when invasive monitoring is indicated (Geeraerts, Crit Care 2008)."}]},
+ {title:"Five days of headache and transient visual obscurations",
+  v:"A 29-year-old with five days of daily headache, pulsatile tinnitus, and brief visual graying when standing. Neuro exam is nonfocal. Measure the ONSD, then look closely at the optic disc (try a caliper on the disc dome).",
+  p:{path:"normal",icp:26,paco2:40,hours:120,base:3.9}, measure:true,
+  qs:[{q:"How do you classify the ONSD?",o:ONSD_OPTS,a:1,e:"The reference ONSD is about 5.6 mm: indeterminate. This is exactly where disc elevation helps."},
+      {q:"What do you see at the optic disc?",o:["No elevation","Disc elevation about 1 mm: supports raised ICP","A bright spot inside the nerve: central retinal artery occlusion","A tethered membrane: retinal detachment"],a:1,e:"Optic disc elevation of 1 mm or more had 100% specificity for fundoscopic disc edema in the cited study. With days of symptoms, the disc has had time to swell."}]},
+ {title:"Acute liver failure, grade 3 encephalopathy",
+  v:"A 45-year-old with acetaminophen-induced acute liver failure, now grade 3 encephalopathy, symptoms for about 6 hours. You are asked whether the ONSD helps.",
+  p:{path:"normal",icp:18,paco2:38,hours:6,base:4.6}, measure:true,
+  qs:[{q:"How do you classify the ONSD?",o:ONSD_OPTS,a:1,e:"The reference ONSD is about 5.5 mm: indeterminate."},
+      {q:"There is no optic disc elevation. Best interpretation?",o:["Raised ICP is excluded","Indeterminate: absence of disc elevation does not exclude raised ICP. Integrate with the clinical picture and imaging, and repeat ONSD serially","The ONSD is falsely elevated by the dressing","Proceed to lumbar puncture"],a:1,e:"Disc elevation lags behind ONSD, so its absence does not rule out raised ICP. Serial ONSD is useful because it changes within minutes."}]},
+ {title:"Flashes and a curtain",
+  v:"A 61-year-old with painless flashes of light and a dark curtain over the upper visual field of the right eye since this morning. Scan the right eye, then ask the patient to look side to side.",
+  p:{path:"rd",icp:9,paco2:40,hours:0,base:4.5}, measure:false,
+  qs:[{q:"Diagnosis?",o:DX_OPTS,a:0,e:"A bright, thick, folded membrane that stays tethered at the optic disc and moves relatively little is a retinal detachment. Urgent ophthalmology."}]},
+ {title:"New floaters",
+  v:"A 66-year-old with new floaters in the right eye for 2 days, no curtain, normal acuity. Scan, then have the patient move the eye.",
+  p:{path:"pvd",icp:9,paco2:40,hours:0,base:4.5}, measure:false,
+  qs:[{q:"Diagnosis?",o:DX_OPTS,a:1,e:"A thin membrane that swirls freely and crosses the midline over the disc without attaching to it is a posterior vitreous detachment. It still needs ophthalmology follow-up because retinal tears can coexist."}]},
+ {title:"Sudden painless vision loss in a patient with diabetes",
+  v:"A 58-year-old with long-standing diabetes notices sudden painless loss of vision in the right eye. The fundus cannot be seen. Hint: check your gain.",
+  p:{path:"vh",icp:9,paco2:40,hours:0,base:4.5}, measure:false,
+  qs:[{q:"Diagnosis?",o:DX_OPTS,a:2,e:"Low-level, mobile, dependent echoes in the vitreous are a vitreous hemorrhage. Low gain can hide it. Look for an underlying retinal detachment too."}]},
+ {title:"Vision loss after prone spine surgery",
+  v:"A 63-year-old wakes from an 8-hour prone lumbar fusion with painless, near-complete vision loss in the right eye. Look just behind the globe, and try color Doppler briefly (watch the TI).",
+  p:{path:"crao",icp:9,paco2:40,hours:0,base:4.5}, measure:false,
+  qs:[{q:"Diagnosis?",o:DX_OPTS,a:4,e:"A bright spot in the center of the optic nerve just behind the globe (retrobulbar spot sign) with absent arterial color flow suggests central retinal artery occlusion. Ultrasound is specific but not sensitive, and optic disc drusen can mimic the spot."}]},
+ {title:"Blunt trauma with blurred vision",
+  v:"A 40-year-old was struck in the right eye by a ball. The globe is intact on exam, but vision is blurred and the iris trembles with eye movement.",
+  p:{path:"lens",icp:9,paco2:40,hours:0,base:4.5}, measure:false,
+  qs:[{q:"Diagnosis?",o:DX_OPTS,a:3,e:"The lens is no longer behind the iris; it has dropped posteriorly into the vitreous. Compare with the other eye."}]},
+ {title:"Penetrating eye injury",
+  v:"A 25-year-old was hit by a metal fragment while grinding. Teardrop-shaped pupil, 360-degree subconjunctival hemorrhage, and a shallow anterior chamber in the right eye.",
+  p:{path:"normal",icp:9,paco2:40,hours:0,base:4.5}, measure:false, rupture:true,
+  qs:[{q:"Should you perform ocular ultrasound?",o:["Yes, with extra gel and light pressure","Yes, but only with color Doppler","No: suspected globe rupture is an absolute contraindication. Shield the eye and consult ophthalmology urgently","Yes, to measure ONSD"],a:2,e:"Pressure on a ruptured globe can extrude intraocular contents. Do not scan; get a CT of the orbits if needed and an urgent ophthalmology consult."}]}
+];
+let C={i:0,score:0,max:0,answered:false,sel:{},placedPenalty:false,results:[]};
+function startCases(){ S.mode="cases"; C={i:0,score:0,max:0,answered:false,sel:{},placedPenalty:false,results:[]}; $("scoreTxt").textContent="Score 0"; $("labPatient").classList.add("hidden"); $("caseCard").classList.remove("hidden"); $("guideRow").classList.add("hidden"); S.guide=false; $("guideChk").checked=false; S.truth=false; loadCase(); }
+function loadCase(){
+  const k=CASES[C.i]; C.answered=false; C.sel={}; C.placedPenalty=false;
+  Object.assign(S,k.p); S.cals=[]; S.log=[]; renderLog(); unfreeze();
+  S.eye="R"; S.plane="T"; S.gaze="C"; S.rock=0; S.press=10; S.air=false; S.color=false; S.preset="spdef"; S.gain=k.p.path==="vh"?30:50;
+  const t=8+Math.round(rnd()*7); S.theta0={RT:t,LT:-t,RS:3+Math.round(rnd()*5),LS:3+Math.round(rnd()*5)};
+  $("rock").value=0; $("rockV").textContent="0°"; S.fan=0; S.fan0=(rnd()<0.5?-1:1)*(1+rnd()*1); $("fan").value=0; $("fanV").textContent="0.0°"; $("press").value=10; $("pressV").textContent="10 (light)"; $("gain").value=S.gain; $("gainV").textContent=S.gain+"%";
+  $("presetSel").value="spdef"; $("airChk").checked=false; $("colorChk").checked=false;
+  setSeg("eyeSeg","R"); setSeg("planeSeg","T"); setSeg("gazeSeg","C");
+  snapAnim(); S.placed=false; $("noProbe").classList.remove("hidden");
+  $("caseTitle").textContent=`Case ${C.i+1} of ${CASES.length}: ${k.title}`;
+  $("caseVignette").innerHTML=k.v + (k.measure?`<div class="small muted" style="margin-top:6px">Measure and save at least one ONSD (both planes if you can), then answer.</div>`:"");
+  let h=""; k.qs.forEach((q,qi)=>{ h+=`<div class="q" data-q="${qi}"><b>${q.q}</b>`; q.o.forEach((o,oi)=>h+=`<span class="opt" data-o="${oi}">${o}</span>`); h+=`</div>`; });
+  $("caseQs").innerHTML=h; $("caseResult").innerHTML="";
+  $("caseQs").querySelectorAll(".q").forEach(qd=>qd.querySelectorAll(".opt").forEach(od=>od.addEventListener("click",()=>{ if(C.answered)return; qd.querySelectorAll(".opt").forEach(x=>x.classList.remove("sel")); od.classList.add("sel"); C.sel[qd.dataset.q]=parseInt(od.dataset.o); })));
+  $("nextCase").disabled=true; $("submitCase").disabled=false;
+  setFb("Read the vignette, then decide whether to place the probe.");
+  updateReadouts(geom(),onsdTrue(S.eye,S.plane),odeTrue());
+}
+$("placeBtn").addEventListener("click",()=>{
+  const k=CASES[C.i];
+  if(S.mode==="cases" && k.rupture){
+    C.placedPenalty=true;
+    $("caseResult").innerHTML=`<div class="expl no">Stop. Suspected globe rupture is an absolute contraindication to ocular ultrasound: probe pressure can extrude intraocular contents. This will cost a point. Answer the question instead.</div>`;
+    return;
+  }
+  S.placed=true; $("noProbe").classList.add("hidden");
+});
+$("submitCase").addEventListener("click",()=>{
+  if(C.answered) return; const k=CASES[C.i];
+  if(Object.keys(C.sel).length<k.qs.length){ $("caseResult").innerHTML=`<div class="expl mid">Answer every question first.</div>`; return; }
+  if(k.measure && !S.log.length){ $("caseResult").innerHTML=`<div class="expl mid">Save at least one ONSD measurement to the log first.</div>`; return; }
+  C.answered=true; let pts=0, max=0; const notes=[];
+  k.qs.forEach((q,qi)=>{ max++; const qd=$("caseQs").querySelector(`.q[data-q="${qi}"]`); const s=C.sel[qi];
+    qd.querySelectorAll(".opt").forEach((od,oi)=>{ if(oi===q.a) od.classList.add("right"); else if(oi===s) od.classList.add("wrong"); });
+    if(s===q.a) pts++; qd.insertAdjacentHTML("beforeend",`<div class="expl">${q.e}</div>`); });
+  if(k.measure){ max++; const ref=Math.max(onsdTrue("R","T"),0); const m=S.log.filter(x=>x.eye==="R"); const avg=m.length?m.reduce((s,x)=>s+x.val,0)/m.length:logMeanAll();
+    const tr=(onsdTrue("R","T")+onsdTrue("R","S"))/2; const err=Math.abs(avg-tr);
+    if(err<=0.5){pts++; notes.push(`<span class="ok">Measurement: your average ${avg.toFixed(2)} mm vs reference ${tr.toFixed(2)} mm (+1).</span>`);} else notes.push(`<span class="no">Measurement: your average ${avg.toFixed(2)} mm vs reference ${tr.toFixed(2)} mm (more than 0.5 mm off).</span>`); }
+  if(!k.rupture){ max++; const P=PRESETS[S.preset], ti=S.color?P.tiC:P.ti; if(P.mi<0.23&&ti<=1&&S.press<=35){pts++; notes.push(`<span class="ok">Safety: ocular-safe output and light pressure at submission (+1).</span>`);} else notes.push(`<span class="no">Safety: ${P.mi>=0.23||ti>1?"output exceeded ocular limits (MI below 0.23, TI at or below 1.0). The case started on a default small parts preset on purpose":"too much pressure on the globe"}.</span>`); }
+  else { if(C.placedPenalty){ pts=Math.max(0,pts-1); notes.push(`<span class="no">You attempted to place the probe on a possibly ruptured globe (-1).</span>`);} }
+  C.score+=pts; C.max+=max; C.results.push({n:C.i+1,title:k.title,pts,max});
+  $("scoreTxt").textContent=`Score ${C.score} / ${C.max}`;
+  $("caseResult").innerHTML=`<div class="expl"><b>This case: ${pts} / ${max}</b><br>${notes.join("<br>")}</div>`;
+  $("submitCase").disabled=true; $("nextCase").disabled=false;
+  if(C.i===CASES.length-1){ $("nextCase").disabled=true; showSummary(); }
+});
+$("nextCase").addEventListener("click",()=>{ if(C.i<CASES.length-1){ C.i++; loadCase(); } });
+$("restartCases").addEventListener("click",startCases);
+function learnerName(){ return ($("learnerName").value||"").trim()||"Learner"; }
+function showSummary(){
+  const pct=Math.round(100*C.score/Math.max(1,C.max));
+  const when=new Date().toLocaleString();
+  let rows=C.results.map(r=>`<tr><td>${r.n}</td><td>${r.title}</td><td>${r.pts} / ${r.max}</td></tr>`).join("");
+  $("caseResult").insertAdjacentHTML("beforeend",`<div class="expl summary"><b>${learnerName().replace(/</g,"&lt;")}: ${C.score} / ${C.max} (${pct}%)</b><br><span class="muted small">${when}</span>
+    <table><tr><th>#</th><th>Case</th><th>Score</th></tr>${rows}</table>
+    <div class="row"><button class="b primary" id="copyRes">Copy results</button><button class="b" id="againBtn">New learner</button><span id="copyMsg" class="small muted"></span></div></div>`);
+  $("copyRes").addEventListener("click",()=>{
+    const txt=`Ocular POCUS Case Challenge\n${learnerName()}  ${when}\nScore ${C.score}/${C.max} (${pct}%)\n`+C.results.map(r=>`${r.n}. ${r.title}: ${r.pts}/${r.max}`).join("\n");
+    try{ navigator.clipboard.writeText(txt).then(()=>{$("copyMsg").textContent="Copied. Paste it into an email or message to your faculty.";},()=>{$("copyMsg").textContent="Copy was blocked: take a screenshot instead.";}); }catch(e){ $("copyMsg").textContent="Copy was blocked: take a screenshot instead."; }
+  });
+  $("againBtn").addEventListener("click",newLearner);
+}
+function newLearner(){
+  $("learnerName").value=""; try{ localStorage.removeItem("ocularSimName"); }catch(e){}
+  S.cals=[]; S.pending=null; S.log=[]; renderLog(); unfreeze();
+  setFb("Freeze the image, choose Calipers, then click twice to place each caliper.");
+  if(S.mode==="cases") startCases(); else startLab();
+  $("learnerName").focus();
+}
+$("newLearner").addEventListener("click",newLearner);
+try{ const nm=localStorage.getItem("ocularSimName"); if(nm) $("learnerName").value=nm; }catch(e){}
+$("learnerName").addEventListener("input",e=>{ try{ localStorage.setItem("ocularSimName",e.target.value); }catch(err){} });
+
+// ---------- anatomy tab ----------
+const ANAT={lid:["Eyelid","Scanned through the closed lid with a transparent dressing and gel."],cornea:["Cornea","Thin curved hypoechoic band with bright surfaces at the top of the image."],ac:["Anterior chamber","Anechoic fluid between cornea and iris."],iris:["Iris","Bright lines on either side of the pupil."],ciliary:["Ciliary body","Echogenic tissue at the lens periphery."],lens:["Lens","Bright anterior and posterior capsule lines with an anechoic center."],vitreous:["Vitreous body","Anechoic gel filling the globe. Look here for detachments and hemorrhage."],retina:["Retina","Inner layer of the bright posterior wall. A detached retina stays tethered at the disc."],choroid:["Choroid","Vascular layer between retina and sclera; part of the bright posterior wall."],sclera:["Sclera","Tough outer coat; brightest at the back of the globe."],disc:["Optic disc","Where the nerve enters the globe: point A for ONSD. Bulges forward with papilledema (ODE)."],sheath:["Dural sheath","The outer bright line of the stripe. ONSD is measured outer wall to outer wall."],csf:["CSF space","Subarachnoid space that communicates with intracranial CSF. It distends with raised ICP."],nerve:["Optic nerve","Hypoechoic stripe behind the globe. The central retinal artery runs in its center (CRAO spot sign)."],fat:["Retrobulbar fat","Bright, heterogeneous tissue that frames the dark nerve stripe."],muscle:["Extraocular muscle","Hypoechoic bands lateral to the nerve; do not mistake them for the sheath."]};
+(function(){
+  const fig=$("anatFig"), chips=$("anatChips");
+  chips.innerHTML=Object.entries(ANAT).map(([k,v])=>`<button data-s="${k}">${v[0]}</button>`).join("");
+  const sel=k=>{
+    const on=chips.querySelector(`button[data-s="${k}"]`).classList.contains("on");
+    chips.querySelectorAll("button").forEach(b=>b.classList.remove("on")); fig.querySelectorAll(".st").forEach(g=>g.classList.remove("on"));
+    if(on){ fig.classList.remove("hl"); $("anatInfo").textContent="The optic nerve sheath is a continuation of the dura. The subarachnoid space around the nerve communicates with the intracranial CSF, so raised ICP distends the sheath, most of all just behind the globe."; return; }
+    fig.classList.add("hl"); chips.querySelector(`button[data-s="${k}"]`).classList.add("on");
+    fig.querySelectorAll(`.st[data-s="${k}"]`).forEach(g=>g.classList.add("on"));
+    $("anatInfo").innerHTML=`<b>${ANAT[k][0]}:</b> ${ANAT[k][1]}`;
+  };
+  chips.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>sel(b.dataset.s)));
+  fig.querySelectorAll(".st").forEach(g=>{ g.style.cursor="pointer"; g.addEventListener("click",()=>sel(g.dataset.s)); });
+  const seg=$("mSeg"); seg.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{ seg.querySelectorAll("button").forEach(x=>x.classList.remove("on")); b.classList.add("on"); const err=b.dataset.v==="err"; $("mErr").style.display=err?"":"none"; $("mOk").style.display=err?"none":""; }));
+  $("papChk").addEventListener("change",e=>{ const p=e.target.checked; $("usNerveP").style.display=p?"":"none"; $("usNerveN").style.display=p?"none":""; $("onsdP").style.display=p?"":"none"; $("onsdN").style.display=p?"none":""; $("odeLbl").style.display=p?"":"none"; });
+  $("tryLab").addEventListener("click",()=>{ document.querySelector('nav.tabs button[data-tab="lab"]').click(); if(!S.labels){$("labelChk").click();} if(!S.guide){$("guideChk").click();} window.scrollTo(0,0); });
+})();
+
+// ---------- loop ----------
+let last=0, frameMs=55, avgCost=10, onScreen=true;
+try{ new IntersectionObserver(es=>{ onScreen=es[0].isIntersecting; }).observe(cv); }catch(e){}
+function loop(t){
+  if(document.hidden || !onScreen || $("scanView").classList.contains("hidden")){ requestAnimationFrame(loop); return; }
+  // ease the displayed probe angles toward the slider values so motion is fluid
+  let moving=false;
+  if(!S.frozen){ if(S.eyeA==null) snapAnim();
+    const de=eyeTarget()-S.eyeA, dr=S.rock-S.rockA, df=S.fan-S.fanA;
+    if(Math.abs(de)>0.03||Math.abs(dr)>0.03||Math.abs(df)>0.02){ S.eyeA+=de*0.3; S.rockA+=dr*0.3; S.fanA+=df*0.3; moving=true; } else snapAnim(); }
+  if(!S.frozen && S.placed && (moving ? t-last>16 : t-last>frameMs)){ last=t; const t0=performance.now(); render(); avgCost=avgCost*0.9+(performance.now()-t0)*0.1; frameMs=Math.max(55,Math.min(200,avgCost*3)); }
+  else if(!S.placed && t-last>200){ last=t; ctx.fillStyle="#000"; const cs=cssSize(),dpr=window.devicePixelRatio||1; cv.width=Math.round(cs.w*dpr); cv.height=Math.round(cs.h*dpr); cv.style.height=cs.h+"px"; ctx.fillRect(0,0,cv.width,cv.height); }
+  requestAnimationFrame(loop);
+}
+window.addEventListener("resize",()=>{ if(S.frozen) redrawFrozen(); });
+renderLog(); requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
