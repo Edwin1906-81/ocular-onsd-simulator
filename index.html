@@ -601,11 +601,24 @@ function retro(G,xe,ze,y,onsd,colorOn,phase){
     nv=mix(nv,v,ss(half-w,half+w,a));
     v=nv;
     if(S.path==="crao"){ const dd=Math.hypot(a,d-2.0); if(dd<0.45) v=Math.max(v,0.98); }
-    if(colorOn && d>0.3 && d<6.5){
-      // central retinal artery (red, toward probe, pulsatile) and vein (blue) run down the middle of the nerve
-      const fade=1-ss(4.5,6.5,d);
-      if(S.path!=="crao" && Math.hypot(xe+0.3,y)<0.3) col=fade*(0.55+0.45*Math.max(0,Math.sin(phase)));
-      else if(Math.hypot(xe-0.35,y)<0.28) col=-fade*(S.path==="crao"?0.35:0.7);
+    if(colorOn && d>-0.2 && d<9){
+      // central retinal artery (red, flow toward probe, pulsatile) and vein (blue, steady) as two small,
+      // gently wavy vessels running side by side down the middle of the nerve, with a laminar flow profile
+      const fade=ss(-0.2,0.5,d)*(1-ss(6.5,9,d));
+      const ey=Math.max(0,Math.abs(y)-0.35);                 // elevation slice thickness
+      const xa=-0.42+0.1*Math.sin(d*1.25+0.4), xv=0.44+0.09*Math.sin(d*1.05+2.1);
+      const ra=0.21, rv=0.27;
+      const da=Math.hypot(xe-xa,ey), dv=Math.hypot(xe-xv,ey);
+      const fr=((phase/(2*Math.PI))%1+1)%1;
+      const sys=Math.exp(-Math.pow((fr-0.14)/0.09,2))+0.35*Math.exp(-Math.pow((fr-0.36)/0.07,2));
+      if(S.path!=="crao" && da<ra+0.05){
+        const prof=Math.max(0,1-Math.pow(da/ra,2)), edge=1-ss(ra-0.05,ra+0.05,da);
+        col=edge*fade*Math.max(0.12,(0.3+0.7*sys)*(0.35+0.65*prof));
+      } else if(dv<rv+0.05){
+        const prof=Math.max(0,1-Math.pow(dv/rv,2)), edge=1-ss(rv-0.05,rv+0.05,dv);
+        const vel=(S.path==="crao"?0.35:0.62)+0.06*Math.sin(phase*0.5);
+        col=-edge*fade*Math.max(0.12,vel*(0.4+0.6*prof));
+      }
     }
   }
   return [v,col];
@@ -701,9 +714,16 @@ function render(){
       let sp = S.frozen ? SPA[i] : SPA[i]*(1-wB)+SPB[i]*wB; if(wallW>0) sp=mix(sp,1,0.65*wallW);
       let g=v*sp*gainF*att; g=Math.log(1+7*g)/Math.log(8); g=Math.max(0,Math.min(1,g));
       const o=i*4;
-      if(col>0){ data[o]=255*Math.min(1,0.45+col*0.6); data[o+1]=40; data[o+2]=30; }
-      else if(col<0){ data[o]=30; data[o+1]=70; data[o+2]=255*Math.min(1,0.4-col*0.7); }
-      else { const c=g*255; data[o]=c; data[o+1]=c; data[o+2]=c*1.02; }
+      const c=g*255;
+      if(col!==0){
+        // velocity color map: dark red to bright red/orange (toward), dark blue to light blue (away), with Doppler mottle
+        const I=Math.min(1,Math.abs(col)*(0.85+0.3*(TEX[i]-1)+0.15*(sp-1))), al=Math.min(1,Math.abs(col)*4);
+        let cr,cg,cb;
+        if(col>0){ cr=110+145*Math.min(1,I*1.4); cg=15+170*Math.max(0,I-0.6); cb=10+30*Math.max(0,I-0.8); }
+        else { cr=10+90*Math.max(0,I-0.6); cg=30+150*Math.max(0,I-0.45); cb=120+135*Math.min(1,I*1.3); }
+        data[o]=mix(c,cr,al); data[o+1]=mix(c,cg,al); data[o+2]=mix(c*1.02,cb,al);
+      }
+      else { data[o]=c; data[o+1]=c; data[o+2]=c*1.02; }
       data[o+3]=255;
     }
   }
@@ -736,7 +756,12 @@ function drawScreen(G,onsd,ode){
   if(S.press>35){ ctx.fillStyle="#ff6b6b"; ctx.fillText("Excess pressure on globe",10*dpr,22*dpr); }
   // color box
   if(S.color){ const a=toWorld(G,-4,R+0.5), b=toWorld(G,4,R+0.5), c2=toWorld(G,4,R+11), d=toWorld(G,-4,R+11);
-    ctx.strokeStyle="rgba(255,255,255,.55)"; ctx.setLineDash([4*dpr,3*dpr]); ctx.beginPath(); ctx.moveTo(X(a.x),Z(a.z)); ctx.lineTo(X(b.x),Z(b.z)); ctx.lineTo(X(c2.x),Z(c2.z)); ctx.lineTo(X(d.x),Z(d.z)); ctx.closePath(); ctx.stroke(); ctx.setLineDash([]); }
+    ctx.strokeStyle="rgba(255,255,255,.55)"; ctx.setLineDash([4*dpr,3*dpr]); ctx.beginPath(); ctx.moveTo(X(a.x),Z(a.z)); ctx.lineTo(X(b.x),Z(b.z)); ctx.lineTo(X(c2.x),Z(c2.z)); ctx.lineTo(X(d.x),Z(d.z)); ctx.closePath(); ctx.stroke(); ctx.setLineDash([]);
+    // color velocity scale (red = toward probe, blue = away)
+    const bx=8*dpr, by=34*dpr, bw=7*dpr, bh=70*dpr; const gr=ctx.createLinearGradient(0,by,0,by+bh);
+    gr.addColorStop(0,"#ffd23a"); gr.addColorStop(0.2,"#ff3a1a"); gr.addColorStop(0.48,"#5a0a06"); gr.addColorStop(0.52,"#06104a"); gr.addColorStop(0.8,"#1a5aff"); gr.addColorStop(1,"#7fe0ff");
+    ctx.fillStyle=gr; ctx.fillRect(bx,by,bw,bh); ctx.fillStyle="rgba(255,255,255,.85)"; ctx.textAlign="left"; ctx.textBaseline="middle";
+    ctx.fillText("+10",bx+bw+3*dpr,by+4*dpr); ctx.fillText("cm/s",bx+bw+3*dpr,by+bh/2); ctx.fillText("-10",bx+bw+3*dpr,by+bh-4*dpr); ctx.textBaseline="top"; }
   // labels
   if(S.labels){
     const lp=lensParams();
